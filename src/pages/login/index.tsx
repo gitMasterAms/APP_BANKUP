@@ -70,7 +70,7 @@ export default function Login({ navigation }: Props) {
 
       <TouchableOpacity
         style={styleLogin.createAccountText}
-        // onPress={() => navigation.navigate("Cadastrar")} esperando tela de cadastro do cláudio
+        onPress={() => navigation.navigate("Cadastro")}
       >
         <Text style={styleLogin.createAccountText}>Não tem conta ainda?</Text>
       </TouchableOpacity>

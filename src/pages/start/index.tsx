@@ -38,7 +38,7 @@ export default function Start({ navigation }: Props) {
 
         <TouchableOpacity 
           style={styles.buttonCadastrar} 
-           onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('Cadastro')}
         >
           <Text style={styles.buttonTextCadastrar}>Cadastrar</Text>
         </TouchableOpacity>

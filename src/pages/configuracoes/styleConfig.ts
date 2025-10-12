@@ -1,99 +1,55 @@
-import { StyleSheet, Platform } from "react-native";
-
-// Centralizando as cores para fácil manutenção
-export const COLORS = {
-  background: '#121212',
-  surface: '#1E1E1E', // Cor para os cards das seções
-  primary: '#FFFFFF',
-  text: '#FFFFFF',
-  gray: '#8E8E93',
-  green: '#00AD4A',
-  greenDark: '#005223', // Cor para o "track" do switch
-};
-
-export const styles = StyleSheet.create({
+export const styles = ({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 20,
+    backgroundColor: "#000", // fundo preto
+    padding: 20,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center', // Centraliza a logo
-    paddingTop: Platform.OS === 'android' ? 40 : 60,
-    position: 'relative', // Para posicionar o botão de voltar
-    height: 80,
+    marginBottom: 20,
+    alignItems: "center",
   },
-  backButton: {
-    position: 'absolute',
-    left: 0, // Alinha à esquerda
-    top: Platform.OS === 'android' ? 40 : 60, // Alinha com o header
-  },
-  logo: {
-    width: 100,
-    height: 40,
-  },
-  screenTitle: {
-    fontSize: 34,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  section: {
-    marginBottom: 24,
+  headerText: {
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "bold",
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.gray,
-    marginBottom: 8,
-    textTransform: 'uppercase', // Deixa o título da seção em maiúsculas como no design
+    color: "#fff",
+    marginTop: 20,
+    marginBottom: 10,
+    fontWeight: "bold",
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 8,
   },
-  rowLabel: {
-    fontSize: 17,
-    color: COLORS.text,
+  label: {
+    color: "#fff",
+    fontSize: 14,
   },
-  valueContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  rowValue: {
-    fontSize: 17,
-    color: COLORS.gray,
-    marginRight: 8,
-  },
-  // Estilos para o controle de tamanho de texto
-  segmentedControl: {
-    flexDirection: 'row',
-    backgroundColor: '#333',
+  fontButton: {
+    backgroundColor: "#222",
+    padding: 10,
     borderRadius: 8,
-    padding: 2,
+    marginRight: 10,
   },
-  segmentButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 7,
+  fontText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-  segmentButtonActive: {
-    backgroundColor: '#555',
+  button: {
+    backgroundColor: "#222",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 12,
   },
-  segmentText: {
-    color: COLORS.text,
-    fontSize: 15,
-  },
-  segmentTextActive: {
-    fontWeight: 'bold',
+  buttonText: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
   },
 });

@@ -36,7 +36,6 @@ export default function Home({ navigation }: Props) {
           <Text style={styles.highlightText}> AGORA!</Text>
         </Text>
 
-        {/* Botão de chamada para ação */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Planos")}

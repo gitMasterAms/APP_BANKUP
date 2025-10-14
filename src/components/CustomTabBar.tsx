@@ -47,7 +47,10 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
               ]}
             >
               {/* Renderiza o ícone correspondente */}
-              {icons[route.name as keyof TabParamList]({ color: "#ece2e2ff", size: 24 })}
+              {icons[route.name as keyof TabParamList]({
+                color: "#ece2e2ff",
+                size: 24,
+              })}
             </View>
           </TouchableOpacity>
         );
@@ -59,7 +62,7 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    height: 60,
+    height: 95,
     backgroundColor: "#18181B", // Cor de fundo da sua barra
     borderTopWidth: 0,
   },
@@ -74,8 +77,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-},
-iconContainerFocused: {
+  },
+  iconContainerFocused: {
     backgroundColor: "#00C851", // Círculo verde quando a aba está ativa
   },
 });

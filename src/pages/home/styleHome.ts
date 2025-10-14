@@ -2,8 +2,8 @@ import { colors } from "../../constants/colors";
 export const styles = {
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 30, // Espaçamento superior para dispositivos iOS com notch
+    backgroundColor: "#121212",
+    paddingTop: 50,
   },
   header: {
     flexDirection: "row",

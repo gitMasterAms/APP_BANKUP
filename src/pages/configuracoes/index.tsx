@@ -1,62 +1,84 @@
 import React, { useState } from "react";
-import { View, Text, Switch, TouchableOpacity } from "react-native";
-import { styles } from "./styleConfig";
+import {
+  View,
+  Text,
+  Switch,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles, COLORS } from "./styleConfig";
+import { AppStackScreenProps } from "../../routes/types";
 
+type TextSizeType = "Normal" | "Grande";
+type Props = AppStackScreenProps<"Config">;
 
-
-export default function Config() {
-  const [darkMode, setDarkMode] = useState(true);
+export default function Config({ navigation }: Props) {
+  // Estados para os toggles e seletores
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [notificationSound, setNotificationSound] = useState(true);
+  const [isHighContrast, setIsHighContrast] = useState(false);
+  const [selectedTextSize, setSelectedTextSize] =
+    useState<TextSizeType>("Normal");
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
       <View style={styles.header}>
-        <Text style={styles.headerText}>Tela de Configurações</Text>
-      </View>
-
-      <Text style={styles.sectionTitle}>Aparência</Text>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Modo escuro</Text>
-        <Switch
-          value={darkMode}
-          onValueChange={setDarkMode}
-          thumbColor={darkMode ? "#00C853" : "#fff"}
-          trackColor={{ false: "#555", true: "#444" }}
-        />
-      </View>
-
-      <Text style={[styles.label, { marginTop: 10 }]}>Aumentar tamanho da fonte</Text>
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.fontButton}>
-          <Text style={styles.fontText}>A+</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()} 
+        >
+          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.fontButton}>
-          <Text style={styles.fontText}>A-</Text>
+        <Text style={styles.headerTitle}>Configurações</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Conta</Text>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => navigation.navigate("ConfigUser")}
+        >
+          <Text style={styles.rowLabel}>Editar perfil</Text>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.sectionTitle}>Privacidade</Text>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Som das notificações</Text>
-        <Switch
-          value={notificationSound}
-          onValueChange={setNotificationSound}
-          thumbColor={notificationSound ? "#00C853" : "#fff"}
-          trackColor={{ false: "#555", true: "#444" }}
-        />
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Aparência</Text>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>Modo escuro</Text>
+          <Switch
+            value={isDarkMode}
+            onValueChange={setIsDarkMode}
+            thumbColor={isDarkMode ? COLORS.green : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: COLORS.greenDark }}
+          />
+        </View>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.rowLabel}>Idioma</Text>
+          <View style={styles.valueContainer}>
+            <Text style={styles.rowValue}>Português (Brasil)</Text>
+            <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+          </View>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Alterar senha</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Gerenciar Digitais</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Privacidade</Text>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.rowLabel}>Alterar senha</Text>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.rowLabel}>Gerenciar digitais</Text>
+          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
-
-

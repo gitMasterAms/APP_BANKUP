@@ -9,6 +9,7 @@ import { RootStackParamList } from "./types";
 import Config from "../pages/configuracoes";
 import DrawerRoutes from "./drawer.routes";
 import PlansScreen from "../pages/planos";
+import ConfigUser from "../pages/configUser/inde";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -28,21 +29,7 @@ export default function Routes() {
       <Stack.Screen name="Cadastro" component={Cadastro} />
       <Stack.Screen name="Token" component={TokenScreen} />
       <Stack.Screen name="CadastroAdicional" component={CadastroAdicional} />
-      <Stack.Screen name="Config" 
-        component={Config} 
-        options={{
-          // mostrar o header nesta tela para ter o botão de voltar
-          headerShown: true,
-          title: "Configurações",
-          headerStyle: {
-            backgroundColor: "#09090B",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      />
+      <Stack.Screen name="Config" component={Config} />
       <Stack.Screen name="AppDrawer" component={DrawerRoutes} />
       <Stack.Screen
         name="Planos"
@@ -60,6 +47,7 @@ export default function Routes() {
           },
         }}
       />
+      <Stack.Screen name="ConfigUser" component={ConfigUser} />
     </Stack.Navigator>
   );
 }

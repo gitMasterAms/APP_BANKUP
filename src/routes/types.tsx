@@ -27,13 +27,12 @@ export type RootStackParamList = {
   Config: undefined;
   Planos: undefined;
   Cadastro: undefined;
+  ConfigUser: undefined;
   Token: undefined;
   CadastroAdicional: undefined;
   // A rota principal após o login será o conjunto da gaveta
   AppDrawer: NavigatorScreenParams<DrawerParamList>;
 };
-
-// --- Helpers para as props ---
 
 // Helper para telas do Stack
 export type AppStackScreenProps<T extends keyof RootStackParamList> =

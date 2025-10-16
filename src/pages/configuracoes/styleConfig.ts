@@ -34,8 +34,8 @@ export const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 0, // Alinha à esquerda
-    top: Platform.OS === "android" ? 55 : 30, // Alinha com o header
+    left: 0, 
+    top: Platform.OS === "android" ? 55 : 30,
   },
   logo: {
     width: 100,
@@ -56,7 +56,7 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.gray,
     marginBottom: 8,
-    textTransform: "uppercase", // Deixa o título da seção em maiúsculas como no design
+    textTransform: "uppercase", 
   },
   row: {
     flexDirection: "row",

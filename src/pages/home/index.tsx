@@ -1,13 +1,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import {
-  FontAwesome,
   Feather,
   MaterialCommunityIcons,
   Ionicons,
+  FontAwesome,
 } from "@expo/vector-icons";
 import { styles } from "./styleHome";
 import { AppTabScreenProps } from "../../routes/types";
+import { Image } from "react-native";
 
 type Props = AppTabScreenProps<"Home">;
 
@@ -15,18 +16,27 @@ export default function Home({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-          <MaterialCommunityIcons name="menu" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.logo}>BankUp</Text>
-        <TouchableOpacity>
-          <Feather
-            name="settings"
+        <View style={styles.header1}>
+          <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+            <MaterialCommunityIcons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+            <Image
+              style={styles.logo}
+              source={require("../../assets/images/bankup-branco-e-verde.png")}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.header2}>
+          <Ionicons name="notifications-outline" size={24} color="#fff" />
+          <FontAwesome
+            name="user-circle"
             size={24}
-            color="white"
-            onPress={() => navigation.navigate("Config")}
+            color="#fff"
+            onPress={() => navigation.navigate("ConfigUser")}
           />
-        </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.mainContent}>

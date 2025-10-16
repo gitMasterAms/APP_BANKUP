@@ -1,28 +1,41 @@
+import { Platform } from "react-native";
 import { colors } from "../../constants/colors";
 export const styles = {
   container: {
     flex: 1,
     backgroundColor: "#121212",
-    paddingTop: 50,
+    paddingHorizontal: 20,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
     marginBottom: 50,
+    paddingTop: Platform.OS === "android" ? 50 : 30,
+    alignItems: "center",
+    // paddingHorizontal: 45,
+    // position: "relative",
+    // width: "100%",
+  },
+  header1: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "50%",
+  },
+  header2: {
+    flexDirection: "row",
+    gap: 30,
   },
   logo: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginLeft: 10,
+    width: 87,
+    height: 20,
+    marginLeft: 5,
   },
   mainContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 50, // Espaçamento para não ficar colado na barra inferior
+    paddingBottom: 50,
   },
   welcomeText: {
     color: "#fff",

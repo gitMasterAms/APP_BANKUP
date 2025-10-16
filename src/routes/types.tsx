@@ -9,8 +9,8 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 // Mapa para as telas DENTRO das Abas (Tabs)
 export type TabParamList = {
   Home: undefined;
-  Notificacoes: undefined;
-  Status: undefined;
+  Pagadores: undefined;
+  Clientes: undefined;
 };
 
 // Mapa para as telas DENTRO da Gaveta (Drawer)

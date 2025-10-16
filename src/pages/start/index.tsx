@@ -1,19 +1,16 @@
-// A tela de boas-vindas deve apenas navegar, não fazer o login
 import React from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
 import { styles } from "./StyleStart";
-import { useNavigation, NavigationProp } from '@react-navigation/native'
-import { AppScreenProps } from "../../routes/types";
+import { AppStackScreenProps } from "../../routes/types";
 
-type Props = AppScreenProps<'Start'>;
+type Props = AppStackScreenProps<"Start">;
 
 export default function Start({ navigation }: Props) {
-
   return (
     <View style={styles.container}>
       <Image
         style={styles.logo}
-        source={require("../../assets/images/bankup-branco.png")}
+        source={require("../../assets/images/bankup-branco-e-verde.png")}
       />
 
       <View style={styles.conteudo}>
@@ -23,25 +20,26 @@ export default function Start({ navigation }: Props) {
           resizeMode="contain"
         />
 
-        <Text style={styles.description}>
-          Automatize sua cobrança. Receba sem pedir, lembre sem insistir.
-        </Text>
       </View>
 
       <View style={styles.btns}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.button}
-           onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate("Login")}
         >
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.buttonCadastrar} 
-          onPress={() => navigation.navigate('Cadastro')}
+        <TouchableOpacity
+          style={styles.buttonCadastrar}
+          onPress={() => navigation.navigate("Cadastro")}
         >
           <Text style={styles.buttonTextCadastrar}>Cadastrar</Text>
         </TouchableOpacity>
+
+        <Text style={styles.description}>
+          Automatize sua cobrança. Receba sem pedir, <br/>lembre sem insistir.
+        </Text>
       </View>
     </View>
   );

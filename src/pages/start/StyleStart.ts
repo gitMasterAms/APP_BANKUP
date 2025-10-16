@@ -10,29 +10,21 @@ export const styles = StyleSheet.create({
     height: 100,
   },
   conteudo:{
-    textAlign: "center",
+    alignItems: "center",
   },
   logo: {
-    marginTop: 15,
-    width: 200,
-    height: 110,
+    marginTop: 20,
+    width: 195,
+    height: 50,
   },
   image: {
-    width: 280,
+    width: 287,
     height: 200,
-  },
-  description: {
-    color: "#fff",
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 40,
-    lineHeight: 20,
   },
   btns:{
     justifyContent: "space-around",
     alignItems: "center",
     gap: 15,
-    marginBottom: 45,
   },
   button: {
     backgroundColor: "#00C851",
@@ -60,5 +52,13 @@ export const styles = StyleSheet.create({
     color: "#c0c0c0ff",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  description: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 15,
+    marginBottom: 40,
+    lineHeight: 20,
   },
 });

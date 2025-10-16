@@ -1,13 +1,13 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { DrawerParamList } from "./types"; 
+import { DrawerParamList } from "./types";
 import TabRoutes from "./tab.routes";
-import Sidebar from "../components/home/Sidebar";
+import AppDrawer from "../components/home/Sidebar";
 
-const Drawer = createDrawerNavigator<DrawerParamList>(); // Use o tipo aqui
+const Drawer = createDrawerNavigator<DrawerParamList>();
 
 export default function DrawerRoutes() {
   return (
-    <Drawer.Navigator drawerContent={(props) => <Sidebar {...props} />}>
+    <Drawer.Navigator drawerContent={(props) => <AppDrawer {...props} />}>
       <Drawer.Screen
         name="MainTabs"
         component={TabRoutes}

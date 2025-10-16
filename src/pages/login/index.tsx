@@ -1,12 +1,19 @@
-import React, { Component, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+} from "react-native";
 import { styleLogin } from "./styleLogin";
 import { colors } from "../../constants/colors";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
 // import { Input } from "../../components/input";
-import { AppScreenProps } from "../../routes/types";
+import { AppStackScreenProps } from "../../routes/types";
+import { styles } from "../home/styleHome";
 
-type Props = AppScreenProps<"Login">;
+type Props = AppStackScreenProps<"Login">;
 
 export default function Login({ navigation }: Props) {
   const [email, setEmail] = useState("");

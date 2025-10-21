@@ -10,6 +10,7 @@ import Config from "../pages/configuracoes";
 import DrawerRoutes from "./drawer.routes";
 import PlansScreen from "../pages/planos";
 import ConfigUser from "../pages/configUser/inde";
+import CriandoCobranca from "../pages/cobrancas/criandoCobranca";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -48,6 +49,7 @@ export default function Routes() {
         }}
       />
       <Stack.Screen name="ConfigUser" component={ConfigUser} />
+      <Stack.Screen name="CriandoCobranca" component={CriandoCobranca} />
     </Stack.Navigator>
   );
 }

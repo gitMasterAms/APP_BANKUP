@@ -25,11 +25,6 @@ export default function Sidebar({ navigation }: Props) {
         <Text style={styles.menuText}>Gráficos</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem}>
-        <Ionicons name="time" size={18} color="#fff" style={styles.icon} />
-        <Text style={styles.menuText}>Histórico</Text>
-      </TouchableOpacity>
-
       <Text style={styles.sectionTitle}>Clientes</Text>
       <TouchableOpacity style={styles.menuItem}>
         <FontAwesome5

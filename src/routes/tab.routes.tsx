@@ -1,9 +1,9 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../pages/home";
 import { Pagadores } from "../pages/pagadores";
-import { Clientes } from "../pages/clientes";
 import { TabParamList } from "./types";
 import { CustomTabBar } from "../components/CustomTabBar";
+import Cobrancas from "../pages/cobrancas";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -23,8 +23,8 @@ export default function TabRoutes() {
       }}
     >
       <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Cobrancas" component={Cobrancas} />
       <Tab.Screen name="Pagadores" component={Pagadores} />
-      <Tab.Screen name="Clientes" component={Clientes} />
     </Tab.Navigator>
   );
 }

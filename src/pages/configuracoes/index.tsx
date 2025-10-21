@@ -11,7 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles, COLORS } from "./styleConfig";
 import { AppStackScreenProps } from "../../routes/types";
 
-type TextSizeType = "Normal" | "Grande";
 type Props = AppStackScreenProps<"Config">;
 
 export default function Config({ navigation }: Props) {
@@ -19,8 +18,7 @@ export default function Config({ navigation }: Props) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [notificationSound, setNotificationSound] = useState(true);
   const [isHighContrast, setIsHighContrast] = useState(false);
-  const [selectedTextSize, setSelectedTextSize] =
-    useState<TextSizeType>("Normal");
+
 
   return (
     <ScrollView

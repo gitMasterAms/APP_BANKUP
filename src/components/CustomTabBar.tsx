@@ -8,8 +8,8 @@ type IconProps = { color: string; size: number };
 
 const icons: Record<keyof TabParamList, (props: IconProps) => JSX.Element> = {
   Home: (props) => <Feather name="home" {...props} />,
+  Cobrancas: (props) => <Feather name="users" size={24} color="#ffff" />,
   Pagadores: (props) => <FontAwesome6 name="dollar-sign" {...props} />,
-  Clientes: (props) => <Feather name="users" size={24} color="#ffff" />,
 };
 
 export function CustomTabBar({ state, navigation }: BottomTabBarProps) {

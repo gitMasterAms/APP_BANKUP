@@ -1,15 +1,15 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Feather, FontAwesome5 } from "@expo/vector-icons";
+import { Feather, FontAwesome6 } from "@expo/vector-icons";
 import { TabParamList } from "../routes/types";
 
 type IconProps = { color: string; size: number };
 
 const icons: Record<keyof TabParamList, (props: IconProps) => JSX.Element> = {
   Home: (props) => <Feather name="home" {...props} />,
-  Notificacoes: (props) => <Feather name="bell" {...props} />,
-  Status: (props) => <FontAwesome5 name="dollar-sign" {...props} />,
+  Cobrancas: (props) => <Feather name="users" size={24} color="#ffff" />,
+  Pagadores: (props) => <FontAwesome6 name="dollar-sign" {...props} />,
 };
 
 export function CustomTabBar({ state, navigation }: BottomTabBarProps) {

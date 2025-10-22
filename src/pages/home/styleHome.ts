@@ -1,37 +1,48 @@
+import { Platform } from "react-native";
 import { colors } from "../../constants/colors";
 export const styles = {
   container: {
     flex: 1,
-    backgroundColor: "#121212",
-    paddingTop: 50,
+    backgroundColor: colors.gray[960],
+    paddingHorizontal: 20,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
     marginBottom: 50,
+    paddingTop: Platform.OS === "android" ? 50 : 30,
+    alignItems: "center",
+  },
+  header1: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "50%",
+  },
+  header2: {
+    flexDirection: "row",
+    gap: 30,
   },
   logo: {
-    color: "#fff",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginLeft: 10,
+    width: 87,
+    height: 22,
+    marginLeft: 5,
+    marginBottom: 5,
   },
   mainContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 50, // Espaçamento para não ficar colado na barra inferior
+    paddingBottom: 50,
   },
   welcomeText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 36,
     fontWeight: "bold",
     marginBottom: 20,
   },
   subText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 18,
     textAlign: "center",
     lineHeight: 25,
@@ -43,7 +54,7 @@ export const styles = {
   button: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00C853",
+    backgroundColor: colors.green[500],
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -51,7 +62,7 @@ export const styles = {
     marginTop: 28,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 15,
     fontWeight: "bold",
   },

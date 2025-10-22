@@ -9,8 +9,8 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 // Mapa para as telas DENTRO das Abas (Tabs)
 export type TabParamList = {
   Home: undefined;
-  Notificacoes: undefined;
-  Status: undefined;
+  Pagadores: undefined;
+  Cobrancas: undefined;
 };
 
 // Mapa para as telas DENTRO da Gaveta (Drawer)
@@ -24,14 +24,14 @@ export type DrawerParamList = {
 export type RootStackParamList = {
   Start: undefined;
   Login: undefined;
+  AppDrawer: NavigatorScreenParams<DrawerParamList>;
   Config: undefined;
   Planos: undefined;
   Cadastro: undefined;
   ConfigUser: undefined;
   Token: undefined;
   CadastroAdicional: undefined;
-  // A rota principal após o login será o conjunto da gaveta
-  AppDrawer: NavigatorScreenParams<DrawerParamList>;
+  CriandoCobranca: undefined;
 };
 
 // Helper para telas do Stack

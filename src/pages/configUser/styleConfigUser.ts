@@ -1,19 +1,10 @@
 import { StyleSheet, Platform } from "react-native";
-
-// Mantendo a mesma paleta de cores para consistência
-export const COLORS = {
-  background: "#121212",
-  surface: "#1E1E1E",
-  text: "#FFFFFF",
-  gray: "#8E8E93",
-  green: "#00AD4A",
-  greenDark: "#005223",
-};
+import { colors } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.gray[960],
     paddingHorizontal: 20,
   },
   header: {
@@ -35,7 +26,7 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "600",
-    color: COLORS.text,
+    color: colors.gray[50],
   },
   scrollContainer: {
     paddingHorizontal: 20,
@@ -49,12 +40,12 @@ export const styles = StyleSheet.create({
   profilePic: {
     width: 90,
     height: 90,
-    borderRadius: 50, // Metade da largura/altura para ser um círculo perfeito
+    borderRadius: 50,
     borderWidth: 2,
-    borderColor: COLORS.green,
+    borderColor: colors.green[500],
   },
   changePicText: {
-    color: COLORS.green,
+    color: colors.green[500],
     fontSize: 13,
     fontWeight: "600",
     marginTop: 12,
@@ -67,18 +58,18 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: COLORS.gray,
+    color: colors.gray[420],
     fontSize: 14,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12, // Borda padronizada
+    backgroundColor: colors.gray[980],
+    borderRadius: 12,
     padding: 16,
-    color: COLORS.text,
+    color: colors.gray[50],
     fontSize: 16,
     borderWidth: 1,
-    borderColor: "#333", // Borda sutil para definir o campo
+    borderColor: "#333",
   },
   // Estilos dos botões
   buttonContainer: {
@@ -87,27 +78,27 @@ export const styles = StyleSheet.create({
     marginTop: 32,
   },
   button: {
-    flex: 1, // Faz os botões ocuparem espaço igual
+    flex: 1,
     paddingVertical: 16,
-    borderRadius: 12, // Borda padronizada, menos arredondada
+    borderRadius: 12, 
     alignItems: "center",
   },
   buttonPrimary: {
-    backgroundColor: COLORS.green,
-    marginLeft: 8, // Espaçamento entre os botões
+    backgroundColor: colors.green[500],
+    marginLeft: 8,
   },
   buttonSecondary: {
-    backgroundColor: COLORS.surface,
-    marginRight: 8, // Espaçamento entre os botões
+    backgroundColor: colors.gray[980],
+    marginRight: 8,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
   },
   buttonTextPrimary: {
-    color: "#000000", // Texto preto para melhor contraste com o verde
+    color: "#000000",
   },
   buttonTextSecondary: {
-    color: COLORS.text,
+    color: colors.gray[50],
   },
 });

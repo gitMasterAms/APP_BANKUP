@@ -1,20 +1,10 @@
 import { StyleSheet, Platform } from "react-native";
-
-// Centralizando as cores para fácil manutenção
-export const COLORS = {
-  background: "#121212",
-  surface: "#1E1E1E", // Cor para os cards das seções
-  primary: "#FFFFFF",
-  text: "#FFFFFF",
-  gray: "#8E8E93",
-  green: "#00AD4A",
-  greenDark: "#005223", // Cor para o "track" do switch
-};
+import { colors } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.gray[960],
     paddingHorizontal: 20,
   },
   header: {
@@ -28,14 +18,14 @@ export const styles = StyleSheet.create({
     marginBottom: 25,
   },
   headerTitle: {
-    color: COLORS.text,
+    color: colors.gray[50],
     fontSize: 24,
     fontWeight: "bold",
   },
   backButton: {
     position: "absolute",
-    left: 0, // Alinha à esquerda
-    top: Platform.OS === "android" ? 55 : 30, // Alinha com o header
+    left: 0, 
+    top: Platform.OS === "android" ? 55 : 30,
   },
   logo: {
     width: 100,
@@ -44,7 +34,7 @@ export const styles = StyleSheet.create({
   screenTitle: {
     fontSize: 34,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: colors.gray[50],
     marginTop: 16,
     marginBottom: 24,
   },
@@ -54,15 +44,15 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: COLORS.gray,
+    color: colors.gray[420],
     marginBottom: 8,
-    textTransform: "uppercase", // Deixa o título da seção em maiúsculas como no design
+    textTransform: "uppercase", 
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.gray[980],
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
@@ -70,7 +60,7 @@ export const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 17,
-    color: COLORS.text,
+    color: colors.gray[50],
   },
   valueContainer: {
     flexDirection: "row",
@@ -78,7 +68,7 @@ export const styles = StyleSheet.create({
   },
   rowValue: {
     fontSize: 17,
-    color: COLORS.gray,
+    color: colors.gray[420],
     marginRight: 8,
   },
   segmentedControl: {
@@ -96,7 +86,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#555",
   },
   segmentText: {
-    color: COLORS.text,
+    color: colors.gray[50],
     fontSize: 15,
   },
   segmentTextActive: {

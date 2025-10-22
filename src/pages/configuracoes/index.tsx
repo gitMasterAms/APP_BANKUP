@@ -8,10 +8,10 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles, COLORS } from "./styleConfig";
+import { styles } from "./styleConfig";
 import { AppStackScreenProps } from "../../routes/types";
+import { colors } from "../../constants/colors";
 
-type TextSizeType = "Normal" | "Grande";
 type Props = AppStackScreenProps<"Config">;
 
 export default function Config({ navigation }: Props) {
@@ -19,8 +19,7 @@ export default function Config({ navigation }: Props) {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [notificationSound, setNotificationSound] = useState(true);
   const [isHighContrast, setIsHighContrast] = useState(false);
-  const [selectedTextSize, setSelectedTextSize] =
-    useState<TextSizeType>("Normal");
+
 
   return (
     <ScrollView
@@ -32,7 +31,7 @@ export default function Config({ navigation }: Props) {
           style={styles.backButton}
           onPress={() => navigation.goBack()} 
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configurações</Text>
       </View>
@@ -44,7 +43,7 @@ export default function Config({ navigation }: Props) {
           onPress={() => navigation.navigate("ConfigUser")}
         >
           <Text style={styles.rowLabel}>Editar perfil</Text>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+          <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
         </TouchableOpacity>
       </View>
 
@@ -55,15 +54,15 @@ export default function Config({ navigation }: Props) {
           <Switch
             value={isDarkMode}
             onValueChange={setIsDarkMode}
-            thumbColor={isDarkMode ? COLORS.green : "#f4f3f4"}
-            trackColor={{ false: "#767577", true: COLORS.greenDark }}
+            thumbColor={isDarkMode ? colors.green[500] : "#f4f3f4"}
+            trackColor={{ false: "#767577", true: colors.green[700] }}
           />
         </View>
         <TouchableOpacity style={styles.row}>
           <Text style={styles.rowLabel}>Idioma</Text>
           <View style={styles.valueContainer}>
             <Text style={styles.rowValue}>Português (Brasil)</Text>
-            <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+            <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
           </View>
         </TouchableOpacity>
       </View>
@@ -72,11 +71,11 @@ export default function Config({ navigation }: Props) {
         <Text style={styles.sectionTitle}>Privacidade</Text>
         <TouchableOpacity style={styles.row}>
           <Text style={styles.rowLabel}>Alterar senha</Text>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+          <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.row}>
           <Text style={styles.rowLabel}>Gerenciar digitais</Text>
-          <Ionicons name="chevron-forward" size={20} color={COLORS.gray} />
+          <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
         </TouchableOpacity>
       </View>
     </ScrollView>

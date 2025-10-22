@@ -10,13 +10,13 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles, COLORS } from "./styleConfigUser";
+import { styles } from "./styleConfigUser";
 import { AppStackScreenProps } from "../../routes/types";
+import { colors } from "../../constants/colors";
 
 type Props = AppStackScreenProps<"ConfigUser">;
 
 export default function ConfigUser({ navigation }: Props) {
-
   const [nomeCompleto, setNomeCompleto] = useState("John Doe");
   const [cpf, setCpf] = useState("123.456.789-00");
   const [endereco, setEndereco] = useState("Rua das Flores, 123");
@@ -28,8 +28,11 @@ export default function ConfigUser({ navigation }: Props) {
         style={{ flex: 1 }}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Editar Perfil</Text>
         </View>
@@ -37,9 +40,7 @@ export default function ConfigUser({ navigation }: Props) {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* --- FOTO DE PERFIL --- */}
           <View style={styles.profilePicContainer}>
-            <Image
-              style={styles.profilePic}
-            />
+            <Image style={styles.profilePic} />
             <TouchableOpacity>
               <Text style={styles.changePicText}>Alterar foto</Text>
             </TouchableOpacity>
@@ -54,7 +55,7 @@ export default function ConfigUser({ navigation }: Props) {
                 value={nomeCompleto}
                 onChangeText={setNomeCompleto}
                 placeholder="Digite seu nome completo"
-                placeholderTextColor={COLORS.gray}
+                placeholderTextColor={colors.gray[400]}
               />
             </View>
 
@@ -65,8 +66,8 @@ export default function ConfigUser({ navigation }: Props) {
                 value={cpf}
                 onChangeText={setCpf}
                 placeholder="000.000.000-00"
-                placeholderTextColor={COLORS.gray}
-                keyboardType="numeric" 
+                placeholderTextColor={colors.gray[400]}
+                keyboardType="numeric"
               />
             </View>
 
@@ -77,7 +78,7 @@ export default function ConfigUser({ navigation }: Props) {
                 value={endereco}
                 onChangeText={setEndereco}
                 placeholder="Seu endereço completo"
-                placeholderTextColor={COLORS.gray}
+                placeholderTextColor={colors.gray[400]}
               />
             </View>
           </View>

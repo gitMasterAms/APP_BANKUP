@@ -3,7 +3,7 @@ import { colors } from "../../constants/colors";
 export const styles = {
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: colors.gray[960],
     paddingHorizontal: 20,
   },
   header: {
@@ -12,9 +12,6 @@ export const styles = {
     marginBottom: 50,
     paddingTop: Platform.OS === "android" ? 50 : 30,
     alignItems: "center",
-    // paddingHorizontal: 45,
-    // position: "relative",
-    // width: "100%",
   },
   header1: {
     flexDirection: "row",
@@ -27,8 +24,9 @@ export const styles = {
   },
   logo: {
     width: 87,
-    height: 20,
+    height: 22,
     marginLeft: 5,
+    marginBottom: 5,
   },
   mainContent: {
     flex: 1,
@@ -38,13 +36,13 @@ export const styles = {
     paddingBottom: 50,
   },
   welcomeText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 36,
     fontWeight: "bold",
     marginBottom: 20,
   },
   subText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 18,
     textAlign: "center",
     lineHeight: 25,
@@ -56,7 +54,7 @@ export const styles = {
   button: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00C853",
+    backgroundColor: colors.green[500],
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 25,
@@ -64,7 +62,7 @@ export const styles = {
     marginTop: 28,
   },
   buttonText: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 15,
     fontWeight: "bold",
   },

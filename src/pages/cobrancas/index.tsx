@@ -9,44 +9,10 @@ import {
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { ScrollView } from "react-native";
 import { AppTabScreenProps } from "../../routes/types";
+import { colors } from "../../constants/colors";
 
 type Props = AppTabScreenProps<"Cobrancas">;
 
-// Cores
-const COLORS = {
-  background: "#121212", // Fundo preto escuro
-  primary: "#ffffff", // Texto principal branco
-  secondary: "#cccccc", // Texto secundário/título da tela
-  cardBackground: "#1e1e1e", // Fundo do card
-  statusPending: "#FFBB01", // Laranja para "Aguardando pagamento"
-  cardBorder: "#00AD4A", // Verde para borda da cobrança
-  headerText: "#3498db", // Azul para o texto "Visualizar cobrança"
-  fabBackground: "#ffffff", // Fundo do FAB
-  fabIcon: "#000000", // Ícone do FAB
-};
-
-// Componente para um Card de Cobrança
-// const BillingCard = ({ amount, client, status, dueDate }) => {
-//   const getStatusStyle = (status) => {
-//     switch (status) {
-//       case 'Aguardando pagamento':
-//         return { color: COLORS.statusPending, fontWeight: '700' };
-//       default:
-//         return { color: COLORS.primary };
-//     }
-//   };
-
-//   return (
-//     <View style={styles.card}>
-//       <Text style={styles.cardAmount}>Cobrança de **R$ {amount}**</Text>
-//       <Text style={styles.cardClient}>{client}</Text>
-//       <Text style={[styles.cardStatus, getStatusStyle(status)]}>{status}</Text>
-//       <Text style={styles.cardDate}>Vence em: {dueDate}</Text>
-//     </View>
-//   );
-// };
-
-// Componente Principal da Tela
 export default function Cobrancas({ navigation }: Props) {
   // Dados de exemplo ( substituir isso por dados da API)
   // const billingData = {
@@ -76,7 +42,7 @@ export default function Cobrancas({ navigation }: Props) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
+          <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cobranças</Text>
 
@@ -91,14 +57,6 @@ export default function Cobrancas({ navigation }: Props) {
       </View>
 
       <View style={styles.content}>
-        {/* Card de Cobrança */}
-        {/* <BillingCard 
-            amount={billingData.amount}
-            client={billingData.client}
-            status={billingData.status}
-            dueDate={billingData.dueDate}
-          /> */}
-
         <View style={styles.card}>
           <View style={styles.clienteValorContainer}>
             <Text style={styles.cliente}>Thais Simon</Text>
@@ -133,7 +91,7 @@ export default function Cobrancas({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.gray[960],
     paddingHorizontal: 20,
   },
   header: {
@@ -147,7 +105,7 @@ const styles = StyleSheet.create({
     marginBottom: 35,
   },
   headerTitle: {
-    color: COLORS.primary,
+    color: colors.gray[50],
     fontSize: 25,
     fontWeight: "bold",
   },
@@ -163,10 +121,10 @@ const styles = StyleSheet.create({
     gap: 30,
   },
   card: {
-    backgroundColor: COLORS.cardBackground,
+    backgroundColor: colors.gray[970],
     borderRadius: 15,
     borderLeftWidth: 5,
-    borderLeftColor: COLORS.cardBorder,
+    borderLeftColor: colors.green[500],
     paddingHorizontal: 15,
     paddingVertical: 12,
     marginBottom: 15,
@@ -177,12 +135,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
   },
-  conteudoDireita: {
-    alignItems: "flex-end",
-  },
   vencimento: {
-    color: COLORS.secondary,
-    fontSize: 15,
+    color: colors.gray[200],
+    fontSize: 13,
     marginBottom: 10,
     alignSelf: "flex-start",
   },
@@ -192,35 +147,34 @@ const styles = StyleSheet.create({
     alignItems: "center", // Centraliza verticalmente se um for maior que o outro
     marginBottom: 5,
   },
+  cliente: {
+    color: colors.gray[50],
+    fontSize: 20,
+    fontWeight: "500",
+    marginTop: 18,
+  },
   valorCobranca: {
-    color: COLORS.primary,
+    color: colors.gray[50],
     letterSpacing: 2,
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: "400",
     marginBottom: 5,
   },
-  cliente: {
-    color: COLORS.primary,
-    letterSpacing: 1,
-    fontSize: 25,
-    fontWeight: "bold",
-    marginTop: 18,
-  },
   statusA: {
-    fontSize: 18,
-    color: COLORS.statusPending,
+    fontSize: 14,
+    color: colors.colorido[20],
     letterSpacing: 0.5,
     marginBottom: 10,
   },
   statusB: {
-    fontSize: 18,
-    color: "#ff3232ff",
+    fontSize: 14,
+    color: colors.colorido[10],
     letterSpacing: 0.5,
     marginBottom: 10,
   },
   statusC: {
-    fontSize: 18,
-    color: "#14DE6B",
+    fontSize: 14,
+    color: colors.green[600],
     letterSpacing: 0.5,
     marginBottom: 10,
   },

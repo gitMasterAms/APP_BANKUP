@@ -38,7 +38,7 @@ export default function Start({ navigation }: Props) {
         </TouchableOpacity>
 
         <Text style={styles.description}>
-          Automatize sua cobrança. Receba sem pedir, <br/>lembre sem insistir.
+          Automatize sua cobrança. Receba sem pedir, {'\n'} lembre sem insistir.
         </Text>
       </View>
     </View>

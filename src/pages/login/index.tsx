@@ -11,7 +11,7 @@ import { styleLogin } from "./styleLogin";
 import { colors } from "../../constants/colors";
 // import { Input } from "../../components/input";
 import { AppStackScreenProps } from "../../routes/types";
-import { styles } from "../home/styleHome";
+import { StatusBar } from "expo-status-bar";
 
 type Props = AppStackScreenProps<"Login">;
 
@@ -38,7 +38,7 @@ export default function Login({ navigation }: Props) {
       setLoading(false);
     }
   }
-
+  <StatusBar style="light" />;
   return (
     <View style={styleLogin.container}>
       <Text style={styleLogin.title}>Bem-vindo de volta!</Text>

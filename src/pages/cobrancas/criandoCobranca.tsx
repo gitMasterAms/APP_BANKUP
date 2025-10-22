@@ -11,22 +11,10 @@ import {
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { AppStackScreenProps } from "../../routes/types";
+import { colors } from "../../constants/colors";
 
 type Props = AppStackScreenProps<"CriandoCobranca">;
-// --- Cores e Constantes ---
-const COLORS = {
-  background: "#121212",
-  primary: "#ffffff",
-  secondary: "#aaaaaa",
-  gray: "#8E8E93",
-  surface: "#1E1E1E",
-  cardBackground: "#303030", // Fundo dos inputs
-  inputBorder: "#00cc00", // Borda ou cor de destaque verde
-  green: "#00AD4A", // Botão verde SALVAR
-  headerText: "#3498db",
-};
 
-// --- Componente Principal da Tela ---
 export default function CriandoCobranca({ navigation }: Props) {
   const [nomeCompleto, setNomeCompleto] = useState("John Doe");
   const [cpf, setCpf] = useState("123.456.789-00");
@@ -39,7 +27,7 @@ export default function CriandoCobranca({ navigation }: Props) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
+          <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Crie sua Cobrança</Text>
       </View>
@@ -59,7 +47,7 @@ export default function CriandoCobranca({ navigation }: Props) {
             // value={nomeCompleto}
             onChangeText={setNomeCompleto}
             placeholder="- Selecione -"
-            placeholderTextColor={COLORS.gray}
+            placeholderTextColor={colors.gray[420]}
           />
         </View>
 
@@ -70,7 +58,7 @@ export default function CriandoCobranca({ navigation }: Props) {
             // value={cpf}
             onChangeText={setCpf}
             placeholder="R$0,00"
-            placeholderTextColor={COLORS.gray}
+            placeholderTextColor={colors.gray[420]}
             keyboardType="numeric"
           />
         </View>
@@ -79,10 +67,9 @@ export default function CriandoCobranca({ navigation }: Props) {
           <Text style={styles.label}>Descrição</Text>
           <TextInput
             style={styles.input}
-            // value={endereco}
             onChangeText={setEndereco}
-            placeholder="- Selecione -"
-            placeholderTextColor={COLORS.gray}
+            placeholder="Digite aqui..."
+            placeholderTextColor={colors.gray[420]}
           />
         </View>
 
@@ -90,10 +77,9 @@ export default function CriandoCobranca({ navigation }: Props) {
           <Text style={styles.label}>Vencimento</Text>
           <TextInput
             style={styles.input}
-            // value={endereco}
             onChangeText={setEndereco}
             placeholder="dd/mm/aaaa"
-            placeholderTextColor={COLORS.gray}
+            placeholderTextColor={colors.gray[420]}
           />
         </View>
 
@@ -101,10 +87,9 @@ export default function CriandoCobranca({ navigation }: Props) {
           <Text style={styles.label}>Muta</Text>
           <TextInput
             style={styles.input}
-            // value={endereco}
             onChangeText={setEndereco}
-            placeholder="-ex: 2%"
-            placeholderTextColor={COLORS.gray}
+            placeholder="ex: 2%"
+            placeholderTextColor={colors.gray[420]}
           />
         </View>
 
@@ -115,7 +100,7 @@ export default function CriandoCobranca({ navigation }: Props) {
             // value={endereco}
             onChangeText={setEndereco}
             placeholder="Selecione sua chave Pix"
-            placeholderTextColor={COLORS.gray}
+            placeholderTextColor={colors.gray[420]}
           />
         </View>
       </View>
@@ -141,7 +126,7 @@ export default function CriandoCobranca({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: colors.gray[960],
     paddingHorizontal: 20,
   },
   header: {
@@ -155,7 +140,7 @@ const styles = StyleSheet.create({
     marginBottom: 35,
   },
   headerTitle: {
-    color: COLORS.primary,
+    color: colors.gray[50],
     fontSize: 25,
     fontWeight: "bold",
   },
@@ -169,14 +154,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   mainTitle: {
-    color: COLORS.primary,
+    color: colors.gray[50],
     fontSize: 19,
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
   },
   subtitle: {
-    color: COLORS.secondary,
+    color: colors.gray[350],
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",
@@ -190,15 +175,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    color: COLORS.gray,
+    color: colors.gray[420],
     fontSize: 15,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.gray[980],
     borderRadius: 12,
     padding: 16,
-    color: COLORS.primary,
+    color: colors.gray[50],
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#333",
@@ -216,11 +201,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonPrimary: {
-    backgroundColor: COLORS.green,
+    backgroundColor: colors.green[500],
     marginLeft: 8,
   },
   buttonSecondary: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: colors.gray[980],
     marginRight: 8,
   },
   buttonText: {
@@ -228,9 +213,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   buttonTextPrimary: {
-    color: "#000000",
+    color: colors.gray[960],
   },
   buttonTextSecondary: {
-    color: COLORS.primary,
+    color: colors.gray[50],
   },
 });

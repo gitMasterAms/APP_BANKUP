@@ -1,15 +1,16 @@
 import { StyleSheet } from "react-native";
+import { colors } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.gray[990],
     alignItems: "center",
     justifyContent: "space-between",
     padding: 40,
     height: 100,
   },
-  conteudo:{
+  conteudo: {
     alignItems: "center",
   },
   logo: {
@@ -21,13 +22,13 @@ export const styles = StyleSheet.create({
     width: 287,
     height: 200,
   },
-  btns:{
+  btns: {
     justifyContent: "space-around",
     alignItems: "center",
     gap: 15,
   },
   button: {
-    backgroundColor: "#00C851",
+    backgroundColor: colors.green[500],
     paddingVertical: 14,
     width: 287,
     paddingHorizontal: 10,
@@ -35,7 +36,7 @@ export const styles = StyleSheet.create({
   },
   buttonCadastrar: {
     borderWidth: 1,
-    borderColor: "#00C851",
+    borderColor: colors.green[500],
     paddingVertical: 14,
     width: 287,
     paddingHorizontal: 10,
@@ -43,18 +44,18 @@ export const styles = StyleSheet.create({
   },
   buttonText: {
     textAlign: "center",
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 20,
     fontWeight: "bold",
   },
-  buttonTextCadastrar:{
+  buttonTextCadastrar: {
     textAlign: "center",
-    color: "#c0c0c0ff",
+    color: colors.gray[200],
     fontSize: 20,
     fontWeight: "bold",
   },
   description: {
-    color: "#fff",
+    color: colors.gray[50],
     fontSize: 14,
     textAlign: "center",
     marginTop: 15,

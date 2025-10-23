@@ -11,6 +11,8 @@ import DrawerRoutes from "./drawer.routes";
 import PlansScreen from "../pages/planos";
 import ConfigUser from "../pages/configUser/inde";
 import CriandoCobranca from "../pages/cobrancas/criandoCobranca";
+import CadastrarPagador from "../pages/pagadores/cadastrar-pagador";
+import DetalhesPagador from "../pages/pagadores/detalhes-pagador";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -50,6 +52,8 @@ export default function Routes() {
       />
       <Stack.Screen name="ConfigUser" component={ConfigUser} />
       <Stack.Screen name="CriandoCobranca" component={CriandoCobranca} />
+      <Stack.Screen name="CadastrarPagador" component={CadastrarPagador} />
+      <Stack.Screen name="DetalhesPagador" component={DetalhesPagador} />
     </Stack.Navigator>
   );
 }

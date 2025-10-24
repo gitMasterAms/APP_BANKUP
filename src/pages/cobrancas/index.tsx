@@ -14,23 +14,12 @@ import { colors } from "../../constants/colors";
 type Props = AppTabScreenProps<"Cobrancas">;
 
 export default function Cobrancas({ navigation }: Props) {
-  // Dados de exemplo ( substituir isso por dados da API)
-  // const billingData = {
-  //   amount: '5500,00',
-  //   client: 'Ana carolina mandas peres',
-  //   status: 'Aguardando pagamento',
-  //   dueDate: '22/09/2025',
-  // };
 
-  // const handleAddBilling = () => {
-  //   console.log('Botão de adicionar cobrança pressionado');
-  //   // Lógica para navegar para a tela de criação de cobrança
-  // };
+  const handleAddBilling = () => {
+    console.log('Botão de adicionar cobrança pressionado');
+    // Lógica para navegar para a tela de criação de cobrança
+  };
 
-  // const handleMenuPress = () => {
-  //   console.log('Botão de menu pressionado');
-  //   // Lógica para abrir um menu lateral, por exemplo
-  // };
 
   return (
     <ScrollView
@@ -118,7 +107,7 @@ const styles = StyleSheet.create({
   // --- Estilos do Conteúdo e Card ---
   content: {
     flex: 1,
-    gap: 30,
+    gap: 10,
   },
   card: {
     backgroundColor: colors.gray[970],
@@ -138,7 +127,6 @@ const styles = StyleSheet.create({
   vencimento: {
     color: colors.gray[200],
     fontSize: 13,
-    marginBottom: 10,
     alignSelf: "flex-start",
   },
   clienteValorContainer: {
@@ -149,14 +137,14 @@ const styles = StyleSheet.create({
   },
   cliente: {
     color: colors.gray[50],
-    fontSize: 20,
-    fontWeight: "500",
-    marginTop: 18,
+    fontSize: 19,
+    fontWeight: "600",
+    marginTop: 1,
   },
   valorCobranca: {
     color: colors.gray[50],
     letterSpacing: 2,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: "400",
     marginBottom: 5,
   },

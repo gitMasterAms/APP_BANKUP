@@ -32,6 +32,8 @@ export type RootStackParamList = {
   Token: undefined;
   CadastroAdicional: undefined;
   CriandoCobranca: undefined;
+  CadastrarPagador: undefined;
+  DetalhesPagador: undefined;
 };
 
 // Helper para telas do Stack

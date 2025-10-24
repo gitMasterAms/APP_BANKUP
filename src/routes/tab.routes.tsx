@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "../pages/home";
-import { Pagadores } from "../pages/pagadores";
+import Pagadores from "../pages/pagadores";
 import { TabParamList } from "./types";
 import { CustomTabBar } from "../components/CustomTabBar";
 import Cobrancas from "../pages/cobrancas";

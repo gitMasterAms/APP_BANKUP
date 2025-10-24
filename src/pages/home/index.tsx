@@ -29,7 +29,9 @@ export default function Home({ navigation }: Props) {
         </View>
 
         <View style={styles.header2}>
-          <Ionicons name="notifications-outline" size={24} color="#fff" />
+          <TouchableOpacity onPress={() => navigation.navigate("Notificacoes")}>
+            <Ionicons name="notifications-outline" size={24} color="#fff" />
+          </TouchableOpacity>
           <FontAwesome
             name="user-circle"
             size={24}

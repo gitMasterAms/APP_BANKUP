@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons, FontAwesome5, Feather } from "@expo/vector-icons";
 import { AppStackScreenProps } from "../../routes/types";
 import { colors } from "../../constants/colors";
+import { DrawerContentComponentProps } from "@react-navigation/drawer";
 
-type Props = AppStackScreenProps<"AppDrawer">;
+type Props = DrawerContentComponentProps;
 
 export default function Sidebar({ navigation }: Props) {
   return (
@@ -25,30 +26,60 @@ export default function Sidebar({ navigation }: Props) {
         <Text style={styles.menuText}>Gráficos</Text>
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Clientes</Text>
       <TouchableOpacity style={styles.menuItem}>
+        <FontAwesome5 name="bell" size={18} color="#fff" style={styles.icon} />
+        <Text style={styles.menuText}>Notificações</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>Pagadores</Text>
+
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => navigation.navigate("CadastrarPagador")}
+        
+      >
         <FontAwesome5
-          name="money-bill-wave"
+          name="user-plus"
+          size={17}
+          color="#fff"
+          style={styles.icon}
+        />
+        <Text style={styles.menuText}>Cadastrar Pagador</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("MainTabs", { screen: "Pagadores" })}>
+        <FontAwesome5
+          name="address-book"
           size={18}
           color="#fff"
           style={styles.icon}
         />
-        <Text style={styles.menuText}>Criar cobrança</Text>
+        <Text style={styles.menuText}>Pagadores</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem}>
-        <Ionicons name="people" size={18} color="#fff" style={styles.icon} />
-        <Text style={styles.menuText}>Clientes</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem}>
-        <Ionicons
-          name="person-add"
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => navigation.navigate("CriandoCobranca")}
+      >
+        <FontAwesome5
+          name="file-invoice-dollar"
           size={18}
           color="#fff"
           style={styles.icon}
         />
-        <Text style={styles.menuText}>Cadastrar clientes</Text>
+        <Text style={styles.menuText}>Cadastrar cobrança</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => navigation.navigate("MainTabs", { screen: "Cobrancas" })}
+      >
+        <FontAwesome5
+          name="receipt"
+          size={18}
+          color="#fff"
+          style={styles.icon}
+        />
+        <Text style={styles.menuText}>Cobranças</Text>
       </TouchableOpacity>
 
       <View style={styles.footer}>
@@ -68,7 +99,7 @@ export default function Sidebar({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000", 
+    backgroundColor: "#000",
     paddingTop: 40,
     paddingHorizontal: 30,
   },

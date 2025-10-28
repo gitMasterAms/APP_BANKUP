@@ -35,14 +35,14 @@ export const styles = StyleSheet.create({
   // Estilos da foto de perfil
   profilePicContainer: {
     alignItems: "center",
-    marginVertical: 24,
+    marginVertical: 35,
   },
   profilePic: {
     width: 90,
     height: 90,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: colors.green[500],
+    borderColor: colors.gray[450],
   },
   changePicText: {
     color: colors.green[500],
@@ -62,13 +62,19 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 8,
   },
-  input: {
+  inputEditar: {
     backgroundColor: colors.gray[980],
     borderRadius: 12,
     padding: 16,
     color: colors.gray[50],
     fontSize: 16,
     borderWidth: 1,
+    borderColor: "#333",
+  },
+    input: {
+    borderRadius: 12,
+    color: colors.gray[300],
+    fontSize: 16,
     borderColor: "#333",
   },
   // Estilos dos botões
@@ -88,7 +94,8 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
   },
   buttonSecondary: {
-    backgroundColor: colors.gray[980],
+    borderColor: colors.green[500],
+    borderWidth: 2,
     marginRight: 8,
   },
   buttonText: {
@@ -99,6 +106,6 @@ export const styles = StyleSheet.create({
     color: "#000000",
   },
   buttonTextSecondary: {
-    color: colors.gray[50],
+    color: colors.green[500],
   },
 });

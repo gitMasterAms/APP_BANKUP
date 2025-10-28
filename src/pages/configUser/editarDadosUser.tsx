@@ -14,9 +14,9 @@ import { styles } from "./styleConfigUser";
 import { AppStackScreenProps } from "../../routes/types";
 import { colors } from "../../constants/colors";
 
-type Props = AppStackScreenProps<"ConfigUser">;
+type Props = AppStackScreenProps<"EditarDadosUser">;
 
-export default function ConfigUser({ navigation }: Props) {
+export default function EditarDadosUser({ navigation }: Props) {
   const [nomeCompleto, setNomeCompleto] = useState("John Doe");
   const [cpf, setCpf] = useState("123.456.789-00");
   const [endereco, setEndereco] = useState("Rua das Flores, 123");
@@ -34,38 +34,65 @@ export default function ConfigUser({ navigation }: Props) {
           >
             <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Perfil</Text>
+          <Text style={styles.headerTitle}>Editar Perfil</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* --- FOTO DE PERFIL --- */}
           <View style={styles.profilePicContainer}>
             <Image style={styles.profilePic} />
+            <TouchableOpacity>
+              <Text style={styles.changePicText}>Alterar foto</Text>
+            </TouchableOpacity>
           </View>
 
           {/* --- FORMULÁRIO --- */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome</Text>
-              <Text style={styles.input}>{nomeCompleto}</Text>
+              <Text style={styles.label}>Nome Completo</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={nomeCompleto}
+                onChangeText={setNomeCompleto}
+                placeholder="Digite seu nome completo"
+                placeholderTextColor={colors.gray[400]}
+              />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>CPF</Text>
-              <Text style={styles.input}>{cpf}</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={cpf}
+                onChangeText={setCpf}
+                placeholder="000.000.000-00"
+                placeholderTextColor={colors.gray[400]}
+                keyboardType="numeric"
+              />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Endereço</Text>
-              <Text style={styles.input}>{endereco}</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={endereco}
+                onChangeText={setEndereco}
+                placeholder="Seu endereço completo"
+                placeholderTextColor={colors.gray[400]}
+              />
             </View>
           </View>
 
           {/* --- BOTÕES DE AÇÃO --- */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.navigate("EditarDadosUser")}>
+            <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => navigation.goBack()} >
               <Text style={[styles.buttonText, styles.buttonTextSecondary]}>
-                Editar
+                CANCELAR
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, styles.buttonPrimary]}>
+              <Text style={[styles.buttonText, styles.buttonTextPrimary]}>
+                SALVAR
               </Text>
             </TouchableOpacity>
           </View>

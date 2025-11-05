@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,44 +6,109 @@ import {
   TouchableOpacity,
   Platform,
   ScrollView,
+  Alert, // Importar
+  ActivityIndicator, // Importar
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import { AppTabScreenProps } from "../../routes/types";
+import { AppTabScreenProps, PayerData } from "../../routes/types"; // Importar PayerData
 import { colors } from "../../constants/colors";
+import { useFocusEffect } from "@react-navigation/native"; // Importar
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../../config/api";
 
 type Props = AppTabScreenProps<"Pagadores">;
 
 export default function Pagadores({ navigation }: Props) {
-  // Dados de exemplo dos pagadores
-  const pagadores = [
-    {
-      id: 1,
-      nome: "Ronaldo",
-      email: "ronaldo@gmail.com",
-      telefone: "(85) 99999-9999",
-    },
-    {
-      id: 2,
-      nome: "Ana Caroline",
-      email: "anacaroline@gmail.com",
-      telefone: "(85) 98888-8888",
-    },
-    {
-      id: 3,
-      nome: "Gildárcio",
-      email: "gildarcio@gmail.com",
-      telefone: "(85) 97777-7777",
-    },
-  ];
+  // 1. Estados para dados da API
+  const [pagadores, setPagadores] = useState<PayerData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 2. Lógica para buscar os pagadores (do PagadorTabela.jsx)
+  useFocusEffect(
+    useCallback(() => {
+      const fetchPagadores = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const token = await AsyncStorage.getItem("token");
+          const response = await fetch(`${API_URL}/financial/recurring`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (!response.ok) {
+            throw new Error("Não foi possível buscar os pagadores.");
+          }
+          const data = await response.json();
+          // Mapeia os dados da API para o tipo PayerData
+          setPagadores(data.map((item: any) => ({
+            account_id: item.account_id,
+            name: item.name,
+            description: item.description,
+            cpf_cnpj: item.cpf_cnpj,
+            email: item.email,
+            phone: item.phone,
+          })));
+        } catch (error: any) {
+          console.error("Erro ao buscar pagadores:", error);
+          setError(error.message || "Erro ao carregar dados.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPagadores();
+    }, [])
+  );
 
   const handleSearch = () => {
-    console.log('Botão de busca pressionado');
-    // Lógica para abrir busca
+    console.log("Botão de busca pressionado");
   };
 
-  const handlePagadorOptions = (pagadorId: number) => {
-    console.log('Opções do pagador:', pagadorId);
-    navigation.navigate("DetalhesPagador");
+  // 3. Lógica de navegação para Detalhes
+  const handlePagadorOptions = (pagador: PayerData) => {
+    // Passa o objeto 'pagador' completo para a tela de detalhes
+    navigation.navigate("DetalhesPagador", { pagador: pagador });
+  };
+
+  // 4. Renderização condicional
+  const renderContent = () => {
+    if (loading) {
+      return <ActivityIndicator size="large" color={colors.green[500]} style={{ marginTop: 50 }} />;
+    }
+    if (error) {
+      return <Text style={styles.errorText}>{error}</Text>;
+    }
+    if (pagadores.length === 0) {
+      return <Text style={styles.errorText}>Nenhum pagador cadastrado.</Text>;
+    }
+
+    // 5. Mapeia sobre o ESTADO 'pagadores'
+    return pagadores.map((pagador) => (
+      <View key={pagador.account_id} style={styles.card}>
+        <View style={styles.cardContent}>
+          <Text style={styles.nome}>{pagador.name}</Text>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="mail" size={16} color={colors.gray[50]} />
+            <Text style={styles.email}>{pagador.email}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="call" size={16} color={colors.gray[50]} />
+            <Text style={styles.telefone}>{pagador.phone}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.optionsButton}
+          onPress={() => handlePagadorOptions(pagador)} // Passa o item
+        >
+          <Ionicons name="ellipsis-horizontal" size={20} color={colors.gray[50]} />
+        </TouchableOpacity>
+      </View>
+    ));
   };
 
   return (
@@ -57,7 +122,7 @@ export default function Pagadores({ navigation }: Props) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pagadores</Text>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.searchButton}
           onPress={handleSearch}
         >
@@ -67,38 +132,16 @@ export default function Pagadores({ navigation }: Props) {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 100 }} // Aumentado para o FAB
         showsVerticalScrollIndicator={false}
       >
-        {pagadores.map((pagador) => (
-          <View key={pagador.id} style={styles.card}>
-            <View style={styles.cardContent}>
-              <Text style={styles.nome}>{pagador.nome}</Text>
-              
-              <View style={styles.infoRow}>
-                <Ionicons name="mail" size={16} color={colors.gray[50]} />
-                <Text style={styles.email}>{pagador.email}</Text>
-              </View>
-              
-              <View style={styles.infoRow}>
-                <Ionicons name="call" size={16} color={colors.gray[50]} />
-                <Text style={styles.telefone}>{pagador.telefone}</Text>
-              </View>
-            </View>
-            
-            <TouchableOpacity
-              style={styles.optionsButton}
-              onPress={() => handlePagadorOptions(pagador.id)}
-            >
-              <Ionicons name="ellipsis-horizontal" size={20} color={colors.gray[50]} />
-            </TouchableOpacity>
-          </View>
-        ))}
+        {renderContent()}
       </ScrollView>
 
+      {/* Botão FAB para 'CadastrarPagador' (Modo de Criação) */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate("CadastrarPagador")}
+        onPress={() => navigation.navigate("CadastrarPagador", {})} // Envia params vazio
       >
         <Ionicons name="add" size={24} color={colors.gray[50]} />
       </TouchableOpacity>
@@ -106,6 +149,7 @@ export default function Pagadores({ navigation }: Props) {
   );
 }
 
+// Estilos (Adicionado 'errorText')
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -214,5 +258,11 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
+  },
+  errorText: {
+    color: colors.gray[300],
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 16,
   },
 });

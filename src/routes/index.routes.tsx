@@ -14,6 +14,7 @@ import CriandoCobranca from "../pages/cobrancas/criandoCobranca";
 import CadastrarPagador from "../pages/pagadores/cadastrar-pagador";
 import DetalhesPagador from "../pages/pagadores/detalhes-pagador";
 import EditarDadosUser from "../pages/configUser/editarDadosUser";
+import EsqueceuSenha from "../pages/esqueceuSenha";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -56,6 +57,7 @@ export default function Routes() {
       <Stack.Screen name="CadastrarPagador" component={CadastrarPagador} />
       <Stack.Screen name="DetalhesPagador" component={DetalhesPagador} />
       <Stack.Screen name="EditarDadosUser" component={EditarDadosUser} />
+      <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} />;
     </Stack.Navigator>
   );
 }

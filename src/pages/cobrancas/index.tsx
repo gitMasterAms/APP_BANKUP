@@ -1,31 +1,196 @@
-import React from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Platform,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
-import { ScrollView } from "react-native";
-import { AppTabScreenProps } from "../../routes/types";
+import { AppTabScreenProps, PayerData, PaymentData } from "../../routes/types"; // Importar tipos
 import { colors } from "../../constants/colors";
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../../config/api";
 
 type Props = AppTabScreenProps<"Cobrancas">;
 
 export default function Cobrancas({ navigation }: Props) {
+  const [cobrancas, setCobrancas] = useState<PaymentData[]>([]);
+  const [pagadores, setPagadores] = useState<PayerData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddBilling = () => {
-    console.log('Botão de adicionar cobrança pressionado');
-    // Lógica para navegar para a tela de criação de cobrança
+  // 1. Lógica para buscar dados (do cobrancaTabela.jsx)
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const token = await AsyncStorage.getItem("token");
+          if (!token) throw new Error("Token não encontrado");
+
+          const headers = { Authorization: `Bearer ${token}` };
+
+          // Busca cobranças e pagadores em paralelo
+          const [paymentsResponse, pagadoresResponse] = await Promise.all([
+            fetch(`${API_URL}/financial/payments`, { headers }),
+            fetch(`${API_URL}/financial/recurring`, { headers }),
+          ]);
+
+          if (!paymentsResponse.ok || !pagadoresResponse.ok) {
+            throw new Error("Falha ao carregar dados do servidor.");
+          }
+
+          const paymentsData = await paymentsResponse.json();
+          const pagadoresData = await pagadoresResponse.json();
+
+          setCobrancas(paymentsData);
+          setPagadores(pagadoresData);
+        } catch (error: any) {
+          setError(error.message || "Erro de rede");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }, [])
+  );
+
+  // 2. Lógica para mapear ID do pagador para Nome (do cobrancaTabela.jsx)
+  const pagadorMap = useMemo(() => {
+    return new Map(pagadores.map((p) => [p.account_id, p.name]));
+  }, [pagadores]);
+
+  // 3. Lógica para FILTRAR cobranças (do cobrancaTabela.jsx)
+  const filteredCobrancas = useMemo(() => {
+    if (pagadores.length === 0) return [];
+    const pagadorIds = new Set(pagadores.map((p) => p.account_id));
+    return cobrancas.filter((c) => pagadorIds.has(c.account_id));
+  }, [cobrancas, pagadores]);
+
+  // 4. Lógica de Exclusão (do cobrancaTabela.jsx)
+  const handleDelete = (cobranca: PaymentData) => {
+    Alert.alert(
+      "Excluir Cobrança",
+      `Deseja excluir a cobrança "${
+        cobranca.description || "sem descrição"
+      }" no valor de R$ ${cobranca.amount}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("token");
+              const response = await fetch(
+                `${API_URL}/financial/payments/${cobranca.payment_id}`,
+                {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              if (response.ok) {
+                Alert.alert("Sucesso", "Cobrança excluída.");
+                // Remove da lista local
+                setCobrancas((prev) =>
+                  prev.filter((c) => c.payment_id !== cobranca.payment_id)
+                );
+              } else {
+                throw new Error("Erro ao excluir cobrança.");
+              }
+            } catch (err: any) {
+              Alert.alert("Erro", err.message);
+            }
+          },
+        },
+      ]
+    );
   };
 
+  // 5. Lógica de Edição (do cobrancaTabela.jsx)
+  const handleEdit = (cobranca: PaymentData) => {
+    navigation.navigate("CriandoCobranca", {
+      editId: cobranca.payment_id,
+      cobranca: cobranca,
+    });
+  };
+
+  // 6. Função de formatação
+  const formatCurrency = (value: number) => {
+    return (value || 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      timeZone: "UTC",
+    });
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <ActivityIndicator
+          size="large"
+          color={colors.green[500]}
+          style={{ marginTop: 50 }}
+        />
+      );
+    }
+    if (error) {
+      return <Text style={styles.emptyText}>{error}</Text>;
+    }
+    if (filteredCobrancas.length === 0) {
+      return <Text style={styles.emptyText}>Nenhuma cobrança encontrada.</Text>;
+    }
+
+    return filteredCobrancas.map((cobranca) => (
+      <View key={cobranca.payment_id} style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cliente}>
+            {pagadorMap.get(cobranca.account_id) || "Cliente não encontrado"}
+          </Text>
+          <Text style={styles.valorCobranca}>
+            {formatCurrency(cobranca.amount)}
+          </Text>
+        </View>
+        <Text style={styles.descricao}>
+          {cobranca.description || "Sem descrição"}
+        </Text>
+        <View style={styles.cardFooter}>
+          <Text style={styles.vencimento}>
+            Vence em: {formatDate(cobranca.due_date)}
+          </Text>
+          {/* Botões de Ação */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleEdit(cobranca)}
+            >
+              <Ionicons name="pencil" size={18} color={colors.gray[50]} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleDelete(cobranca)}
+            >
+              <Ionicons name="trash" size={18} color={colors.colorido[10]} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    ));
+  };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 40 }}
-    >
+    <View style={styles.containerWrapper}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -35,49 +200,28 @@ export default function Cobrancas({ navigation }: Props) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cobranças</Text>
 
-        <TouchableOpacity>
-          <FontAwesome5
-            name="plus"
-            size={23}
-            color="#fff"
-            onPress={() => navigation.navigate("CriandoCobranca")}
-          />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CriandoCobranca", {})} // Modo de Criação
+        >
+          <FontAwesome5 name="plus" size={23} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.card}>
-          <View style={styles.clienteValorContainer}>
-            <Text style={styles.cliente}>Thais Simon</Text>
-            <Text style={styles.vencimento}>Vence em: 28/10/2025</Text>
-          </View>
-          <Text style={styles.valorCobranca}>R$1.200</Text>
-          <Text style={styles.statusA}>Aguardando Pagamento</Text>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.clienteValorContainer}>
-            <Text style={styles.cliente}>Leoncio</Text>
-            <Text style={styles.vencimento}>Vence em: 28/11/2025</Text>
-          </View>
-          <Text style={styles.valorCobranca}>R$1.500</Text>
-          <Text style={styles.statusB}>Pagamento Atrasado</Text>
-        </View>
-
-        <View style={styles.card}>
-          <View style={styles.clienteValorContainer}>
-            <Text style={styles.cliente}>Macaco Pirado</Text>
-            <Text style={styles.vencimento}>Vence em: 20/10/2025</Text>
-          </View>
-          <Text style={styles.valorCobranca}>R$1.800</Text>
-          <Text style={styles.statusC}>Pagamento Feito</Text>
-        </View>
-      </View>
-    </ScrollView>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        <View style={styles.content}>{renderContent()}</View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  containerWrapper: {
+    flex: 1,
+    backgroundColor: colors.gray[960],
+  },
   container: {
     flex: 1,
     backgroundColor: colors.gray[960],
@@ -87,11 +231,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 45,
+    paddingHorizontal: 20, // Ajustado
     paddingTop: Platform.OS === "android" ? 50 : 30,
-    position: "relative",
+    paddingBottom: 15,
     width: "100%",
-    marginBottom: 35,
+    marginBottom: 20, // Ajustado
+    backgroundColor: colors.gray[960],
   },
   headerTitle: {
     color: colors.gray[50],
@@ -99,15 +244,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   backButton: {
-    position: "absolute",
-    left: 0,
-    top: Platform.OS === "android" ? 55 : 30,
+    // Removido 'position: absolute' para alinhar corretamente
   },
-
-  // --- Estilos do Conteúdo e Card ---
   content: {
     flex: 1,
     gap: 10,
+  },
+  emptyText: {
+    color: colors.gray[300],
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 16,
   },
   card: {
     backgroundColor: colors.gray[970],
@@ -117,53 +264,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     marginBottom: 15,
-    flexDirection: "column",
   },
-  primeiraLinhaContainer: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
-  },
-  vencimento: {
-    color: colors.gray[200],
-    fontSize: 13,
-    alignSelf: "flex-start",
-  },
-  clienteValorContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between", // Cliente à esquerda, Valor à direita
-    alignItems: "center", // Centraliza verticalmente se um for maior que o outro
+    alignItems: "center",
     marginBottom: 5,
   },
   cliente: {
     color: colors.gray[50],
     fontSize: 19,
     fontWeight: "600",
-    marginTop: 1,
   },
   valorCobranca: {
     color: colors.gray[50],
-    letterSpacing: 2,
     fontSize: 18,
-    fontWeight: "400",
-    marginBottom: 5,
+    fontWeight: "bold",
   },
-  statusA: {
+  descricao: {
+    color: colors.gray[300],
     fontSize: 14,
-    color: colors.colorido[20],
-    letterSpacing: 0.5,
+    fontStyle: "italic",
     marginBottom: 10,
   },
-  statusB: {
-    fontSize: 14,
-    color: colors.colorido[10],
-    letterSpacing: 0.5,
-    marginBottom: 10,
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 5,
   },
-  statusC: {
-    fontSize: 14,
-    color: colors.green[600],
-    letterSpacing: 0.5,
-    marginBottom: 10,
+  vencimento: {
+    color: colors.gray[200],
+    fontSize: 13,
   },
+  actionButtons: {
+    flexDirection: "row",
+  },
+  iconButton: {
+    marginLeft: 15,
+    padding: 5,
+  },
+  // Status removidos pois a API não parece tê-los
 });

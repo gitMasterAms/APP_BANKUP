@@ -61,15 +61,18 @@ export default function TokenScreen({ navigation }: Props) {
 
     try {
       // Endpoint de verificação (lógica do backend da web)
+      console.log(userId, code, type);
       const response = await fetch(`${API_URL}/user/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: Number(userId),
+          userId: userId,
           twoFactorCode: code, // Usa twoFactorCode como na web
           type: type,
         }),
       });
+
+      console.log(response);
 
       const data = await response.json();
 
@@ -80,8 +83,11 @@ export default function TokenScreen({ navigation }: Props) {
       // SUCESSO! Agora, decide o que fazer baseado no 'type'
       if (type === "login_verification") {
         await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("profile_complete", String(data.profile_complete || false));
-        
+        await AsyncStorage.setItem(
+          "profile_complete",
+          String(data.profile_complete || false)
+        );
+
         // Salva dados do usuário se disponíveis
         if (data.user) {
           await AsyncStorage.setItem("user", JSON.stringify(data.user));
@@ -94,11 +100,12 @@ export default function TokenScreen({ navigation }: Props) {
 
         Alert.alert("Sucesso!", "Código verificado com sucesso!");
 
-        // Navega baseado no profile_complete (igual à web)
-        if (data.profile_complete) {
-          navigation.navigate("AppDrawer"); // Navega para Home via Drawer
+        const isComplete = String(data.profile_complete) === "true";
+
+        if (isComplete) {
+          navigation.navigate("AppDrawer");
         } else {
-          navigation.navigate("CadastroAdicional"); // Navega para completar cadastro
+          navigation.navigate("CadastroAdicional");
         }
       } else if (type === "password_reset") {
         if (data.resetToken) {

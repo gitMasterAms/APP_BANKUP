@@ -10,12 +10,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 export type TabParamList = {
   Home: undefined;
   Pagadores: undefined;
-  Cobrancas: {
-    editId?: string;
-    cobranca?: string;
-    cobrancas: PaymentData;
-    pagadores: PayerData;
-  };
+  Cobrancas: undefined;
 };
 
 // Mapa para as telas DENTRO da Gaveta (Drawer)
@@ -36,11 +31,12 @@ export type RootStackParamList = {
   ConfigUser: undefined;
   Token: undefined;
   CadastroAdicional: undefined;
-  CriandoCobranca: { editId?: string; cobranca: UserData };
+  CriandoCobranca: { editId?: string; cobranca?: PaymentData };
   CadastrarPagador: { editId?: string };
   DetalhesPagador: undefined;
   EditarDadosUser: { currentUserData: UserData };
   EsqueceuSenha: undefined;
+  RedefinirSenha: undefined;
 };
 
 export type UserData = {

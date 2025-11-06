@@ -81,7 +81,7 @@ export default function Login({ navigation }: Props) {
 
       // Salva email e userId no AsyncStorage
       await AsyncStorage.setItem("email", email);
-      await AsyncStorage.setItem("userId", String(userId)); // Salva como string
+      await AsyncStorage.setItem("userId", String(userId));
       const type = "login_verification";
 
       // Etapa 2: Enviar o código de verificação
@@ -101,14 +101,13 @@ export default function Login({ navigation }: Props) {
           "Código de verificação enviado para o seu e-mail."
         );
         await AsyncStorage.setItem("type", type);
-        navigation.navigate("Token"); // Navega para a tela de Token
+        navigation.navigate("Token");
       } else {
         const erro = await sendCodeRes.json();
         setErro(erro.msg || "Erro ao enviar o código de verificação.");
       }
     } catch (err) {
       console.error("Erro geral no login:", err);
-      // Se deu ERR_CONNECTION_TIMED_OUT, vai cair aqui
       setErro("Erro de conexão com o servidor. Tente novamente.");
     } finally {
       setLoading(false);
@@ -146,7 +145,7 @@ export default function Login({ navigation }: Props) {
       {erro ? <Text style={styleLogin.error}>{erro}</Text> : null}
 
       <TouchableOpacity
-        onPress={() => (!loading ? navigation.navigate("Home") : null)} // Assumindo que a rota existe
+        onPress={() => (!loading ? navigation.navigate("EsqueceuSenha") : null)}
       >
         <Text style={styleLogin.forgotPassword}>Esqueceu a senha?</Text>
       </TouchableOpacity>

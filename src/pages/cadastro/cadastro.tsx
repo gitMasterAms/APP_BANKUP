@@ -1,63 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert, // Importar o Alert nativo
-  ActivityIndicator, // Para o feedback de carregamento
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '../../constants/colors';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importar o AsyncStorage
-import { API_URL } from '../../config/api'; // Importar a URL da API
 
 export default function Cadastro({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirma, setConfirma] = useState('');
   const [erro, setErro] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false); // Estado de carregamento
-
-  // 1. Hook para verificar se o usuário já está logado (similar ao desktop)
-  useEffect(() => {
-    const verificarToken = async () => {
-      const token = await AsyncStorage.getItem('token');
-
-      if (token) {
-        try {
-          const res = await fetch(`${API_URL}/user/check`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await res.json();
-
-          if (data.valid === true) {
-            // Se já estiver logado, redireciona para a Home (ou sua rota principal de app)
-            navigation.navigate('Home'); // Ajuste 'Home' se o nome da rota for outro
-          }
-          // Se não for válido, o AsyncStorage será limpo ou o token expirará
-          // e o usuário permanecerá na tela de cadastro/login.
-        } catch (err) {
-          console.log('Erro ao verificar o token:', err);
-          // Em caso de erro de rede, mantém na página
-        }
-      }
-    };
-
-    verificarToken();
-  }, [navigation]);
 
   function validarEmail(valor: string) {
     return /.+@.+\..+/.test(valor);
   }
 
-  // 2. Função de cadastro atualizada com a lógica de API
-  async function onCadastrar() {
-    // Mantém as validações locais
+  function onCadastrar() {
     if (!validarEmail(email)) {
       return setErro('Informe um e-mail válido.');
     }
@@ -67,39 +23,8 @@ export default function Cadastro({ navigation }: any) {
     if (senha !== confirma) {
       return setErro('As senhas não coincidem.');
     }
-    
     setErro(null);
-    setIsLoading(true); // Inicia o carregamento
-
-    try {
-      const resposta = await fetch(`${API_URL}/user/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: senha,
-          confirmpassword: confirma, // Nome do campo igual ao do desktop
-        }),
-      });
-
-      if (resposta.ok) {
-        // Sucesso no cadastro
-        Alert.alert('Sucesso!', 'Cadastro realizado com sucesso!');
-        navigation.navigate('Login'); // Navega para o Login
-      } else {
-        // Erro vindo do servidor (ex: e-mail já existe)
-        const erroData = await resposta.json();
-        setErro(erroData.msg || 'Erro ao cadastrar. Verifique os dados.');
-      }
-    } catch (erro) {
-      // Erro de rede
-      console.error('Erro na requisição:', erro);
-      setErro('Erro de conexão com o servidor. Tente novamente.');
-    } finally {
-      setIsLoading(false); // Finaliza o carregamento
-    }
+    navigation.navigate('Token', { email });
   }
 
   return (
@@ -117,7 +42,6 @@ export default function Cadastro({ navigation }: any) {
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
-          editable={!isLoading} // Desabilita edição durante o carregamento
         />
 
         <Text style={styles.label}>Senha</Text>
@@ -128,7 +52,6 @@ export default function Cadastro({ navigation }: any) {
           secureTextEntry
           value={senha}
           onChangeText={setSenha}
-          editable={!isLoading}
         />
 
         <Text style={styles.label}>Confirmar Senha</Text>
@@ -139,33 +62,15 @@ export default function Cadastro({ navigation }: any) {
           secureTextEntry
           value={confirma}
           onChangeText={setConfirma}
-          editable={!isLoading}
         />
 
         {erro ? <Text style={styles.error}>{erro}</Text> : null}
 
-        {/* 3. Botão com feedback de carregamento */}
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]} // Estilo de desabilitado
-          onPress={onCadastrar}
-          disabled={isLoading} // Desabilita o botão durante o carregamento
-        >
-          {isLoading ? (
-            <ActivityIndicator color={colors.gray[900]} /> // Mostra o spinner
-          ) : (
-            <Text style={styles.buttonText}>Verificar Email</Text> // Mostra o texto
-          )}
+        <TouchableOpacity style={styles.button} onPress={onCadastrar}>
+          <Text style={styles.buttonText}>Verificar Email</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footerText}>
-          Já tem uma conta?{' '}
-          <Text
-            style={styles.link}
-            onPress={() => (isLoading ? null : navigation.navigate('Login'))} // Não permite navegação se estiver carregando
-          >
-            Entrar
-          </Text>
-        </Text>
+        <Text style={styles.footerText}>Já tem uma conta? <Text style={styles.link} onPress={() => navigation.navigate('Login')}>Entrar</Text></Text>
       </View>
     </View>
   );
@@ -218,20 +123,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignSelf: 'center',
   },
-  buttonDisabled: {
-    backgroundColor: colors.green[700], // Um pouco mais escuro para indicar 'disabled'
-  },
   buttonText: {
     color: colors.gray[900],
     fontWeight: 'bold',
     fontSize: 16,
   },
   error: {
-    color: '#ff5252', // Vermelho para erros
-    textAlign: 'center',
+    color: '#ff5252',
     marginBottom: 8,
-    fontSize: 14,
-    fontWeight: 'bold',
   },
   footerText: {
     color: colors.gray[100],

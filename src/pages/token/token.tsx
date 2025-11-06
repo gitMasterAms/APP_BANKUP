@@ -60,13 +60,13 @@ export default function TokenScreen({ navigation }: Props) {
     setError(null);
 
     try {
-      // Endpoint de verificação (lógica inferida do backend)
+      // Endpoint de verificação (lógica do backend da web)
       const response = await fetch(`${API_URL}/user/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: Number(userId), // O backend pode esperar um número
-          code: code,
+          userId: Number(userId),
+          twoFactorCode: code, // Usa twoFactorCode como na web
           type: type,
         }),
       });
@@ -79,27 +79,36 @@ export default function TokenScreen({ navigation }: Props) {
 
       // SUCESSO! Agora, decide o que fazer baseado no 'type'
       if (type === "login_verification") {
-        // Fluxo de LOGIN: Salva o token principal e vai para a Home
         await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user)); // Salva dados do usuário
+        await AsyncStorage.setItem("profile_complete", String(data.profile_complete || false));
+        
+        // Salva dados do usuário se disponíveis
+        if (data.user) {
+          await AsyncStorage.setItem("user", JSON.stringify(data.user));
+        }
 
         // Limpa os dados temporários
         await AsyncStorage.removeItem("userId");
         await AsyncStorage.removeItem("type");
         await AsyncStorage.removeItem("email");
 
-        Alert.alert("Sucesso!", "Login verificado com sucesso.");
-        navigation.navigate("Home"); // Rota da Home
-      } else if (type === "password_reset") {
-        // Fluxo de ESQUECER SENHA: Salva o token de redefinição e vai para a tela de nova senha
-        await AsyncStorage.setItem("resetToken", data.resetToken);
+        Alert.alert("Sucesso!", "Código verificado com sucesso!");
 
-        // Limpa os dados temporários (exceto userId, que 'RedefinirSenha' pode usar)
+        // Navega baseado no profile_complete (igual à web)
+        if (data.profile_complete) {
+          navigation.navigate("AppDrawer"); // Navega para Home via Drawer
+        } else {
+          navigation.navigate("CadastroAdicional"); // Navega para completar cadastro
+        }
+      } else if (type === "password_reset") {
+        if (data.resetToken) {
+          await AsyncStorage.setItem("resetToken", data.resetToken);
+        }
         await AsyncStorage.removeItem("type");
         await AsyncStorage.removeItem("email");
 
         Alert.alert("Sucesso!", "Código verificado. Defina sua nova senha.");
-        navigation.navigate("EsqueceuSenha"); // Rota de redefinir senha
+        navigation.navigate("RedefinirSenha"); // Navega para RedefinirSenha
       }
     } catch (err: any) {
       setError(err.message || "Erro de conexão com o servidor.");

@@ -107,22 +107,29 @@ export default function CriandoCobranca({ navigation, route }: Props) {
     setLoading(true);
     setErro(null);
 
-    // Validação
+    // Validação (igual à web)
     if (!pagadorId || !valor || !dataVencimento || !pixKey) {
-      setErro("Preencha os campos obrigatórios (*).");
+      setErro("Preencha todos os campos obrigatórios (Cliente, Valor, Vencimento, Chave PIX).");
       setLoading(false);
       return;
     }
 
-    // Monta o payload
+    // Validação de days_before_due_date (igual à web)
+    if (isNaN(Number(notificarDias))) {
+      setErro('O campo "Notificar (dias antes)" deve ser um número.');
+      setLoading(false);
+      return;
+    }
+
+    // Monta o payload (igual à web)
     const paymentData = {
       account_id: pagadorId,
-      amount: Number(valor.replace(",", ".")) || 0,
+      amount: Number(valor.toString().replace(",", ".")) || 0,
       description: descricao,
       due_date: formatarParaISO(dataVencimento),
       pix_key: pixKey,
-      fine_amount: Number(multa.replace(",", ".")) || 0,
-      interest_rate: Number(jurosMes.replace(",", ".")) || 0,
+      fine_amount: Number((multa || "").toString().replace(",", ".")) || 0,
+      interest_rate: Number((jurosMes || "").toString().replace(",", ".")) || 0,
       days_before_due_date: Number(notificarDias) || 0,
     };
 

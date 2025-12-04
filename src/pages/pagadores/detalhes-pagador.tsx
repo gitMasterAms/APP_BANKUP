@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // <<< MUDANÇA: Importar useCallback
 import {
   View,
   Text,
@@ -6,18 +6,18 @@ import {
   TouchableOpacity,
   Platform,
   ScrollView,
-  Alert, // Importar
-  ActivityIndicator, // Importar
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { AppStackScreenProps, PayerData } from "../../routes/types"; // Importar PayerData
+import { useFocusEffect } from "@react-navigation/native"; // <<< MUDANÇA: Importar useFocusEffect
+import { AppStackScreenProps, PayerData } from "../../routes/types";
 import { colors } from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../../config/api";
 
 type Props = AppStackScreenProps<"DetalhesPagador">;
 
-// Tipo para os pagamentos (cobranças)
 type Payment = {
   payment_id: string;
   amount: number;
@@ -26,48 +26,87 @@ type Payment = {
 };
 
 export default function DetalhesPagador({ navigation, route }: Props) {
-  // 1. Recebe o pagador da rota
-  const { pagador } = route.params;
+  // 1. Recebe o ID do pagador (agora é uma string)
+  const { pagadorId } = route.params;
 
+  // <<< MUDANÇA: Estado para guardar os dados do pagador
+  const [pagador, setPagador] = useState<PayerData | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [loadingPayments, setLoadingPayments] = useState(false);
-  const [loadingDelete, setLoadingDelete] = useState(false);
 
-  // 2. Busca o histórico de pagamentos (cobranças) deste pagador
-  useEffect(() => {
-    const fetchPayments = async () => {
-      setLoadingPayments(true);
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch(`${API_URL}/financial/payments`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const allPayments = await response.json();
-        
-        // Filtra os pagamentos SÓ deste pagador (como na web)
-        const payerPayments = allPayments.filter(
-          (p: any) => p.account_id === pagador.account_id
-        );
-        setPayments(payerPayments);
-      } catch (e) {
-        console.error("Erro ao buscar pagamentos", e);
-      } finally {
-        setLoadingPayments(false);
-      }
-    };
-    fetchPayments();
-  }, [pagador.account_id]);
+  // <<< MUDANÇA: Estados de loading separados
+  const [loadingPayer, setLoadingPayer] = useState(true);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+  const [loadingDelete, setLoadingDelete] = useState(false); // 2. <<< MUDANÇA: Usar useFocusEffect para buscar TODOS os dados
 
+  // Isso roda sempre que a tela entra em foco (ex: ao voltar do "Editar")
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        // Reseta os estados de loading
+        setLoadingPayer(true);
+        setLoadingPayments(true);
+        setPagador(null); // Limpa dados antigos
 
-  // 3. Lógica para EDITAR (navega para a tela de cadastro)
+        try {
+          const token = await AsyncStorage.getItem("token");
+
+          // --- Tarefa 1: Buscar os dados do Pagador ---
+          const payerResponse = await fetch(
+            `${API_URL}/financial/recurring/${pagadorId}`, // Usa o ID (string)
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (!payerResponse.ok)
+            throw new Error("Erro ao buscar dados do pagador.");
+          const payerData = await payerResponse.json();
+          setPagador(payerData);
+          setLoadingPayer(false); // Para de carregar o pagador
+
+          // --- Tarefa 2: Buscar os Pagamentos (Cobranças) ---
+          const paymentsResponse = await fetch(
+            `${API_URL}/financial/payments`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          if (!paymentsResponse.ok)
+            throw new Error("Erro ao buscar pagamentos.");
+          const allPayments = await paymentsResponse.json(); // <<< MUDANÇA: Filtra comparando string com string
+
+          const payerPayments = allPayments.filter(
+            (p: any) => p.account_id === pagadorId
+          );
+          setPayments(payerPayments);
+        } catch (e: any) {
+          console.error("Erro ao buscar dados:", e);
+          Alert.alert(
+            "Erro",
+            e.message || "Não foi possível carregar os dados."
+          );
+        } finally {
+          // Garante que ambos os loadings terminem
+          setLoadingPayer(false);
+          setLoadingPayments(false);
+        }
+      };
+
+      fetchData();
+    }, [pagadorId]) // A dependência é o ID (string)
+  ); // 3. <<< MUDANÇA: Lógica para EDITAR
+
   const handleEditar = () => {
-    navigation.navigate("CadastrarPagador", { editId: pagador.account_id });
-  };
+    // Passa o ID (string), que é a variável 'pagadorId'
+    navigation.navigate("CadastrarPagador", { editId: pagadorId });
+  }; // 4. <<< MUDANÇA: Lógica para EXCLUIR
 
-  // 4. Lógica para EXCLUIR (do PagadorTabela.jsx)
   const handleExcluir = async () => {
+    // Adiciona uma verificação de segurança
+    if (!pagador) return;
+
     Alert.alert(
       "Confirmar Exclusão",
+      // Usa o 'pagador.name' do estado
       `Tem certeza que deseja excluir "${pagador.name}"? Esta ação não pode ser desfeita.`,
       [
         { text: "Cancelar", style: "cancel" },
@@ -79,7 +118,8 @@ export default function DetalhesPagador({ navigation, route }: Props) {
             try {
               const token = await AsyncStorage.getItem("token");
               const response = await fetch(
-                `${API_URL}/financial/recurring/${pagador.account_id}`,
+                // Passa o ID (string)
+                `${API_URL}/financial/recurring/${pagadorId}`,
                 {
                   method: "DELETE",
                   headers: { Authorization: `Bearer ${token}` },
@@ -102,6 +142,16 @@ export default function DetalhesPagador({ navigation, route }: Props) {
     );
   };
 
+  // <<< MUDANÇA: Adiciona um estado de loading principal
+  // Enquanto busca os dados do pagador ou se o pagador for nulo
+  if (loadingPayer || !pagador) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={colors.green[500]} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -111,6 +161,7 @@ export default function DetalhesPagador({ navigation, route }: Props) {
         >
           <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Detalhes do Pagador</Text>
       </View>
 
@@ -118,33 +169,48 @@ export default function DetalhesPagador({ navigation, route }: Props) {
         <Text style={styles.nomePagador}>{pagador.name}</Text>
 
         {/* 5. Exibe os dados reais do pagador */}
+
         <View style={styles.infoContainer}>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Email</Text>
+
             <Text style={styles.value}>{pagador.email}</Text>
           </View>
+
           <View style={styles.infoRow}>
             <Text style={styles.label}>Telefone</Text>
+
             <Text style={styles.value}>{pagador.phone}</Text>
           </View>
+
           <View style={styles.infoRow}>
             <Text style={styles.label}>CPF/CNPJ</Text>
+
             <Text style={styles.value}>{pagador.cpf_cnpj}</Text>
           </View>
         </View>
 
         {/* 6. Botões de Ação (Editar e Excluir) */}
+
         <View style={styles.actionButtonContainer}>
-           <TouchableOpacity 
-            style={[styles.button, styles.editButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.editButton]}
             onPress={handleEditar}
             disabled={loadingDelete}
           >
             <Ionicons name="pencil" size={16} color={colors.gray[900]} />
+
             <Text style={styles.buttonTextPrimary}>EDITAR</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.button, styles.deleteButton, loadingDelete && styles.buttonDisabled]} 
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+
+              styles.deleteButton,
+
+              loadingDelete && styles.buttonDisabled,
+            ]}
             onPress={handleExcluir}
             disabled={loadingDelete}
           >
@@ -153,39 +219,52 @@ export default function DetalhesPagador({ navigation, route }: Props) {
             ) : (
               <>
                 <Ionicons name="trash" size={16} color={colors.gray[50]} />
+
                 <Text style={styles.buttonTextSecondary}>EXCLUIR</Text>
               </>
             )}
           </TouchableOpacity>
         </View>
 
-
         {/* 7. Histórico de Cobranças */}
+
         <View style={styles.dropdownContainer}>
           <View style={styles.dropdownButton}>
-            <Text style={styles.dropdownText}>
-              Histórico de Cobranças
-            </Text>
+            <Text style={styles.dropdownText}>Histórico de Cobranças</Text>
           </View>
 
           {loadingPayments ? (
-            <ActivityIndicator color={colors.green[500]} style={{ margin: 15 }} />
+            <ActivityIndicator
+              color={colors.green[500]}
+              style={{ margin: 15 }}
+            />
           ) : (
             <View style={styles.dropdownMenu}>
               {payments.length === 0 ? (
-                <Text style={styles.noPaymentsText}>Nenhuma cobrança encontrada.</Text>
+                <Text style={styles.noPaymentsText}>
+                  Nenhuma cobrança encontrada.
+                </Text>
               ) : (
                 payments.map((pagamento) => (
                   <View key={pagamento.payment_id} style={styles.dropdownItem}>
-                     <View>
-                      <Text style={styles.dropdownItemText}>{pagamento.description || "Cobrança"}</Text>
-                      <Text style={styles.dropdownItemDate}>
-                        Venc: {new Date(pagamento.due_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}
+                    <View>
+                      <Text style={styles.dropdownItemText}>
+                        {pagamento.description || "Cobrança"}
                       </Text>
-                     </View>
-                     <Text style={styles.dropdownItemValue}>
-                       R$ {pagamento.amount.toFixed(2)}
-                     </Text>
+
+                      <Text style={styles.dropdownItemDate}>
+                        Venc:{" "}
+                        {new Date(pagamento.due_date).toLocaleDateString(
+                          "pt-BR",
+
+                          { timeZone: "UTC" }
+                        )}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.dropdownItemValue}>
+                      R$ {pagamento.amount.toFixed(2)}
+                    </Text>
                   </View>
                 ))
               )}
@@ -196,8 +275,13 @@ export default function DetalhesPagador({ navigation, route }: Props) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.gray[960],
+  },
   container: {
     flex: 1,
     backgroundColor: colors.gray[960],
@@ -265,19 +349,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     flex: 1, // Permite quebra de linha
-    textAlign: 'right',
+    textAlign: "right",
     marginLeft: 10,
   },
   // Botões de Ação
   actionButtonContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 30,
   },
   button: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 15,
     borderRadius: 10,
     minHeight: 48,
@@ -287,7 +371,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   deleteButton: {
-    backgroundColor: '#ff4d4d', // Vermelho
+    backgroundColor: "#ff4d4d", // Vermelho
     marginLeft: 10,
   },
   buttonTextPrimary: {
@@ -329,31 +413,31 @@ const styles = StyleSheet.create({
   },
   noPaymentsText: {
     color: colors.gray[400],
-    textAlign: 'center',
+    textAlign: "center",
     padding: 15,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   dropdownItem: {
     paddingVertical: 12,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: colors.gray[900],
   },
   dropdownItemText: {
     color: colors.gray[50],
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dropdownItemDate: {
     color: colors.gray[400],
     fontSize: 12,
   },
   dropdownItemValue: {
-     color: colors.gray[50],
-     fontSize: 16,
-     fontWeight: 'bold',
-  }
+    color: colors.gray[50],
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });

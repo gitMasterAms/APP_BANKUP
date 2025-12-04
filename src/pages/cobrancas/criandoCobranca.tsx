@@ -19,6 +19,9 @@ import {
 import { colors } from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../../config/api";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 type Props = AppStackScreenProps<"CriandoCobranca">;
 
@@ -29,35 +32,30 @@ const formatarDeISO = (isoDate: string): string => {
   return `${dia}/${mes}/${ano}`;
 };
 
-// Helper para formatar DD/MM/AAAA -> YYYY-MM-DD
-const formatarParaISO = (data: string): string => {
-  if (!data || data.length < 10) return "";
-  const [dia, mes, ano] = data.split("/");
-  return `${ano}-${mes}-${dia}`;
-};
-
 export default function CriandoCobranca({ navigation, route }: Props) {
   const editId = route.params?.editId;
   const cobranca = route.params?.cobranca;
 
-  // Estados para o formulário (baseado no CobrancaForm.jsx)
   const [pagadorId, setPagadorId] = useState("");
   const [valor, setValor] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [dataVencimento, setDataVencimento] = useState(""); // DD/MM/AAAA
+  // <<< CORREÇÃO 3: dataVencimento agora armazena "AAAA-MM-DD"
+  const [dataVencimento, setDataVencimento] = useState("");
   const [pixKey, setPixKey] = useState("");
   const [multa, setMulta] = useState("");
   const [jurosMes, setJurosMes] = useState("");
   const [notificarDias, setNotificarDias] = useState("0");
 
-  // Estados para o Dropdown
+  // <<< CORREÇÃO 4: Mover os estados do DatePicker para o nível superior
+  const [dateObject, setDateObject] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false); // Estados para o Dropdown
+
   const [pagadores, setPagadores] = useState<PayerData[]>([]);
   const [dropdownAberto, setDropdownAberto] = useState(false);
   const [pagadorSelecionado, setPagadorSelecionado] = useState(
     "Selecione um cliente"
-  );
+  ); // Estados de controle
 
-  // Estados de controle
   const [loading, setLoading] = useState(false);
   const [loadingPagadores, setLoadingPagadores] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -84,9 +82,9 @@ export default function CriandoCobranca({ navigation, route }: Props) {
 
   // 2. Preenche o formulário se estiver em "Modo de Edição"
   useEffect(() => {
-    if (cobranca && editId) {
+    if (cobranca && editId && pagadores.length > 0) {
+      // <<< Garante que pagadores carregaram
       setPagadorId(cobranca.account_id);
-      // Encontra o nome do pagador para exibir no dropdown
       const nomePagador = pagadores.find(
         (p) => p.account_id === cobranca.account_id
       )?.name;
@@ -94,13 +92,45 @@ export default function CriandoCobranca({ navigation, route }: Props) {
 
       setValor(String(cobranca.amount || ""));
       setDescricao(cobranca.description || "");
-      setDataVencimento(formatarDeISO(cobranca.due_date));
+      // <<< CORREÇÃO 5: Salvar a data como YYYY-MM-DD e atualizar o DateObject
+      const isoDate = cobranca.due_date.split("T")[0]; // Pega "YYYY-MM-DD"
+      setDataVencimento(isoDate);
+      // Adiciona T00:00:00 para evitar problemas de fuso horário ao criar o new Date()
+      setDateObject(new Date(isoDate + "T00:00:00"));
+
       setPixKey(cobranca.pix_key || "");
       setMulta(String(cobranca.fine_amount || ""));
       setJurosMes(String(cobranca.interest_rate || ""));
-      // 'days_before_due_date' não é salvo no backend, então não é preenchido
     }
-  }, [cobranca, editId, pagadores]); // Roda quando os pagadores também carregarem
+  }, [cobranca, editId, pagadores]);
+
+  /// <<< CORREÇÃO 6: Mover os Handlers do DatePicker para o nível superior
+  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (event.type === "set" || event.type === "dismissed") {
+      setShowPicker(false);
+    }
+
+    if (event.type === "set" && selectedDate) {
+      setDateObject(selectedDate);
+
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const formattedDate = `${year}-${month}-${day}`; // YYYY-MM-DD
+
+      // Salva no formato YYYY-MM-DD
+      setDataVencimento(formattedDate);
+    }
+  };
+
+  const onDateChangeWeb = (dateString: string) => {
+    // Web já retorna YYYY-MM-DD
+    setDataVencimento(dateString);
+
+    if (dateString) {
+      setDateObject(new Date(dateString + "T00:00:00"));
+    }
+  };
 
   // 3. Lógica de Salvar (do CobrancaForm.jsx)
   const handleSalvar = async () => {
@@ -109,7 +139,9 @@ export default function CriandoCobranca({ navigation, route }: Props) {
 
     // Validação (igual à web)
     if (!pagadorId || !valor || !dataVencimento || !pixKey) {
-      setErro("Preencha todos os campos obrigatórios (Cliente, Valor, Vencimento, Chave PIX).");
+      setErro(
+        "Preencha todos os campos obrigatórios (Cliente, Valor, Vencimento, Chave PIX)."
+      );
       setLoading(false);
       return;
     }
@@ -126,11 +158,13 @@ export default function CriandoCobranca({ navigation, route }: Props) {
       account_id: pagadorId,
       amount: Number(valor.toString().replace(",", ".")) || 0,
       description: descricao,
-      due_date: formatarParaISO(dataVencimento),
+
+      // <<< CORREÇÃO 7: Enviar a data diretamente (ela já está como YYYY-MM-DD)
+      due_date: dataVencimento,
+      days_before_due_date: Number(notificarDias) || 0,
       pix_key: pixKey,
       fine_amount: Number((multa || "").toString().replace(",", ".")) || 0,
       interest_rate: Number((jurosMes || "").toString().replace(",", ".")) || 0,
-      days_before_due_date: Number(notificarDias) || 0,
     };
 
     try {
@@ -275,17 +309,56 @@ export default function CriandoCobranca({ navigation, route }: Props) {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Data de vencimento *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="DD/MM/AAAA"
-            placeholderTextColor={colors.gray[400]}
-            value={dataVencimento}
-            onChangeText={setDataVencimento}
-            keyboardType="numeric"
-            maxLength={10}
-            editable={!loading}
-          />
+          <Text style={styles.label}>Data de vencimento *</Text>     
+          {" "}
+          {Platform.OS === "web" ? (
+            <TextInput
+              style={styles.input} // @ts-ignore
+              type="date"
+              // O valor (dataVencimento) já está em YYYY-MM-DD
+              value={dataVencimento}
+              onChangeText={onDateChangeWeb}
+              placeholder="AAAA-MM-DD" // ...
+            />
+          ) : (
+            // MOBILE
+            <>
+              {" "}
+              <TouchableOpacity
+                style={styles.input}
+                // <<< CORREÇÃO 9: Chamar o setShowPicker(true) que está no escopo correto
+                onPress={() => setShowPicker(true)}
+                disabled={loading}
+              >
+                {" "}
+                <Text
+                  style={{
+                    color: dataVencimento ? colors.gray[100] : colors.gray[300],
+                  }}
+                >
+                  {/* <<< CORREÇÃO 10: Formatar para DD/MM/AAAA apenas para exibir */}
+                   {" "}
+                  {dataVencimento
+                    ? formatarDeISO(dataVencimento)
+                    : "Selecione a data"}{" "}
+                </Text>
+                {" "}
+              </TouchableOpacity>
+              {" "}
+              {showPicker && (
+                // <<< CORREÇÃO 11: Usar <DateTimePicker> (não -Android)
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={dateObject}
+                  mode="date"
+                  is24Hour={true}
+                  display="spinner"
+                  onChange={onDateChange} // Não precisa de keyboardType ou maxLength aqui
+                />
+              )}
+                         {" "}
+            </>
+          )}
         </View>
 
         <View style={styles.inputGroup}>

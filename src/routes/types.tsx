@@ -8,7 +8,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
 // Mapa para as telas DENTRO das Abas (Tabs)
 export type TabParamList = {
-  Home: undefined;
+  Home: { currentUserData: UserData };
   Pagadores: undefined;
   Cobrancas: undefined;
 };
@@ -33,7 +33,7 @@ export type RootStackParamList = {
   CadastroAdicional: undefined;
   CriandoCobranca: { editId?: string; cobranca?: PaymentData };
   CadastrarPagador: { editId?: string };
-  DetalhesPagador: undefined;
+  DetalhesPagador: { pagadorId: string };
   EditarDadosUser: { currentUserData: UserData };
   EsqueceuSenha: undefined;
   RedefinirSenha: undefined;

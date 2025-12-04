@@ -135,6 +135,29 @@ export default function Cobrancas({ navigation }: Props) {
     });
   };
 
+  // --- CONFIGURAÇÃO VISUAL DO STATUS ---
+  const getStatusConfig = (cobranca: PaymentData) => {
+    // Se tiver status vindo da API no futuro
+    // @ts-ignore 
+    if (cobranca.status === "PAID") {
+      return { text: "Pagamento concluído", color: colors.green[500] };
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    const vencimento = new Date(cobranca.due_date);
+    vencimento.setHours(0,0,0,0);
+
+    if (vencimento < hoje) {
+      // Data passou e não foi pago
+      return { text: "Pagamento atrasado", color: "#EF4444" }; // Vermelho
+    } else {
+      // Data ainda vai chegar
+      return { text: "Aguardando pagamento", color: "#FBBF24" }; // Amarelo Ouro
+    }
+  };
+
   const renderContent = () => {
     if (loading) {
       return (
@@ -152,41 +175,52 @@ export default function Cobrancas({ navigation }: Props) {
       return <Text style={styles.emptyText}>Nenhuma cobrança encontrada.</Text>;
     }
 
-    return filteredCobrancas.map((cobranca) => (
-      <View key={cobranca.payment_id} style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cliente}>
-            {pagadorMap.get(cobranca.account_id) || "Cliente não encontrado"}
+    return filteredCobrancas.map((cobranca) => {
+      // AQUI: Calculamos o status para CADA cobrança
+      const status = getStatusConfig(cobranca);
+
+      return (
+        <View key={cobranca.payment_id} style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cliente}>
+              {pagadorMap.get(cobranca.account_id) || "Cliente não encontrado"}
+            </Text>
+            <Text style={styles.valorCobranca}>
+              {formatCurrency(cobranca.amount)}
+            </Text>
+          </View>
+
+          <Text style={styles.descricao}>
+            {cobranca.description || "Sem descrição"}
           </Text>
-          <Text style={styles.valorCobranca}>
-            {formatCurrency(cobranca.amount)}
+
+          {/* STATUS: Cor aplicada dinamicamente via style inline */}
+          <Text style={[styles.statusText, { color: status.color }]}>
+            {status.text}
           </Text>
-        </View>
-        <Text style={styles.descricao}>
-          {cobranca.description || "Sem descrição"}
-        </Text>
-        <View style={styles.cardFooter}>
-          <Text style={styles.vencimento}>
-            Vence em: {formatDate(cobranca.due_date)}
-          </Text>
-          {/* Botões de Ação */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => handleEdit(cobranca)}
-            >
-              <Ionicons name="pencil" size={18} color={colors.gray[50]} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => handleDelete(cobranca)}
-            >
-              <Ionicons name="trash" size={18} color={colors.colorido[10]} />
-            </TouchableOpacity>
+
+          <View style={styles.cardFooter}>
+            <Text style={styles.vencimento}>
+              Vence em: {formatDate(cobranca.due_date)}
+            </Text>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => handleEdit(cobranca)}
+              >
+                <Ionicons name="pencil" size={18} color={colors.gray[50]} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => handleDelete(cobranca)}
+              >
+                <Ionicons name="trash" size={18} color={colors.colorido[10]} />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    ));
+      );
+    });
   };
 
   return (
@@ -283,9 +317,13 @@ const styles = StyleSheet.create({
   },
   descricao: {
     color: colors.gray[300],
-    fontSize: 14,
+    fontSize: 13,
     fontStyle: "italic",
     marginBottom: 10,
+  },
+  statusText: {
+    fontSize: 15,
+    fontWeight: "500", // Peso médio
   },
   cardFooter: {
     flexDirection: "row",

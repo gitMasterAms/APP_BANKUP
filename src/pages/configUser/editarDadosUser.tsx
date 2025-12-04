@@ -9,57 +9,77 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator, // Importado
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "./styleConfigUser"; // Importa os estilos do arquivo separado
-import { AppStackScreenProps } from "../../routes/types"; // Importado
+import { styles } from "./styleConfigUser";
+import { AppStackScreenProps } from "../../routes/types";
 import { colors } from "../../constants/colors";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Importado
-import { API_URL } from "../../config/api"; // Importado
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../../config/api";
 
 type Props = AppStackScreenProps<"EditarDadosUser">;
 
-// Esta tela agora recebe os dados da tela anterior
 export default function EditarDadosUser({ navigation, route }: Props) {
-  // 1. Recebe os dados atuais da rota
   const { currentUserData } = route.params;
 
-  // 2. Inicia o estado com os dados recebidos
-  const [originalData] = useState(currentUserData); // Guarda os dados originais
+  // Converte data ISO → DD/MM/AAAA
+  const formatarDeISO = (isoDate?: string) => {
+    if (!isoDate || !isoDate.includes("-")) return "";
+    const [ano, mes, dia] = isoDate.split("T")[0].split("-");
+    return `${dia}/${mes}/${ano}`;
+  };
+
+  // Converte DD/MM/AAAA → ISO
+  const formatarParaISO = (data: string) => {
+    if (!data || data.length < 10) return "";
+    const [dia, mes, ano] = data.split("/");
+    return `${ano}-${mes}-${dia}`;
+  };
+
+  // Estado inicial com todos os campos
   const [nomeCompleto, setNomeCompleto] = useState(currentUserData.name || "");
   const [cpf, setCpf] = useState(currentUserData.cpf_cnpj || "");
   const [endereco, setEndereco] = useState(currentUserData.address || "");
+  const [telefone, setTelefone] = useState(currentUserData.phone || "");
+  const [email, setEmail] = useState(currentUserData.email || "");
+  const [nascimento, setNascimento] = useState(
+    formatarDeISO(currentUserData.birthdate)
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 3. Lógica para Salvar (PUT /user/profile)
   const handleSalvar = async () => {
     setLoading(true);
     setError(null);
-    const token = await AsyncStorage.getItem("token");
 
+    const token = await AsyncStorage.getItem("token");
     if (!token) {
       Alert.alert("Erro", "Autenticação inválida.");
       setLoading(false);
       return;
     }
 
-    // Monta o payload
-    // IMPORTANTE: Mantém os dados originais (email, phone, etc.)
-    // e atualiza apenas os campos desta tela.
+    // Validações básicas
+    if (!nomeCompleto || !cpf || !email) {
+      Alert.alert("Atenção", "Preencha os campos obrigatórios (nome, CPF e email).");
+      setLoading(false);
+      return;
+    }
+
     const updatedData = {
-      ...originalData,
       name: nomeCompleto,
       cpf_cnpj: cpf,
       address: endereco,
-      // Os campos 'email', 'phone' e 'birthdate' de 'originalData' são preservados
+      phone: telefone,
+      email: email,
+      birthdate: formatarParaISO(nascimento),
     };
 
     try {
       const response = await fetch(`${API_URL}/user/profile`, {
-        method: "PUT", // Usa PUT para atualizar (como no CadastroAdicional)
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -67,12 +87,13 @@ export default function EditarDadosUser({ navigation, route }: Props) {
         body: JSON.stringify(updatedData),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
         Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
-        navigation.goBack(); // Volta para a tela ConfigUser (que vai recarregar)
+        navigation.goBack(); // volta para tela ConfigUser
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.msg || "Erro ao salvar o perfil.");
+        throw new Error(responseData.msg || "Erro ao salvar o perfil.");
       }
     } catch (err: any) {
       setError(err.message || "Erro de conexão.");
@@ -88,6 +109,7 @@ export default function EditarDadosUser({ navigation, route }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
+        {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -99,7 +121,7 @@ export default function EditarDadosUser({ navigation, route }: Props) {
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {/* --- FOTO DE PERFIL --- */}
+          {/* FOTO DE PERFIL */}
           <View style={styles.profilePicContainer}>
             <Image
               style={styles.profilePic}
@@ -110,10 +132,10 @@ export default function EditarDadosUser({ navigation, route }: Props) {
             </TouchableOpacity>
           </View>
 
-          {/* --- FORMULÁRIO --- */}
+          {/* FORMULÁRIO */}
           <View style={styles.form}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome Completo</Text>
+              <Text style={styles.label}>Nome Completo *</Text>
               <TextInput
                 style={styles.inputEditar}
                 value={nomeCompleto}
@@ -125,7 +147,7 @@ export default function EditarDadosUser({ navigation, route }: Props) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>CPF</Text>
+              <Text style={styles.label}>CPF *</Text>
               <TextInput
                 style={styles.inputEditar}
                 value={cpf}
@@ -148,12 +170,52 @@ export default function EditarDadosUser({ navigation, route }: Props) {
                 editable={!loading}
               />
             </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Telefone</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={telefone}
+                onChangeText={setTelefone}
+                placeholder="(00) 00000-0000"
+                placeholderTextColor={colors.gray[400]}
+                keyboardType="phone-pad"
+                editable={!loading}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email *</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="seuemail@email.com"
+                placeholderTextColor={colors.gray[400]}
+                keyboardType="email-address"
+                editable={!loading}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Data de Nascimento</Text>
+              <TextInput
+                style={styles.inputEditar}
+                value={nascimento}
+                onChangeText={setNascimento}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={colors.gray[400]}
+                maxLength={10}
+                keyboardType="numeric"
+                editable={!loading}
+              />
+            </View>
           </View>
 
-          {/* Exibe o erro, se houver */}
+          {/* Exibe erro */}
           {error && <Text style={styles.errorText}>{error}</Text>}
 
-          {/* --- BOTÕES DE AÇÃO --- */}
+          {/* BOTÕES */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.buttonSecondary]}
@@ -169,7 +231,7 @@ export default function EditarDadosUser({ navigation, route }: Props) {
               style={[
                 styles.button,
                 styles.buttonPrimary,
-                loading && styles.buttonDisabled, // Estilo de desabilitado
+                loading && styles.buttonDisabled,
               ]}
               onPress={handleSalvar}
               disabled={loading}

@@ -8,7 +8,7 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 
 // Mapa para as telas DENTRO das Abas (Tabs)
 export type TabParamList = {
-  Home: undefined;
+  Home: { currentUserData: UserData };
   Pagadores: undefined;
   Cobrancas: undefined;
 };
@@ -31,10 +31,42 @@ export type RootStackParamList = {
   ConfigUser: undefined;
   Token: undefined;
   CadastroAdicional: undefined;
-  CriandoCobranca: undefined;
-  CadastrarPagador: undefined;
-  DetalhesPagador: undefined;
-  EditarDadosUser: undefined;
+  CriandoCobranca: { editId?: string; cobranca?: PaymentData };
+  CadastrarPagador: { editId?: string };
+  DetalhesPagador: { pagadorId: string };
+  EditarDadosUser: { currentUserData: UserData };
+  EsqueceuSenha: undefined;
+  RedefinirSenha: undefined;
+};
+
+export type UserData = {
+  email?: string;
+  name?: string;
+  cpf_cnpj?: string;
+  phone?: string;
+  address?: string;
+  birthdate?: string;
+};
+export type PayerData = {
+  account_id: string;
+  name: string;
+  description: string;
+  cpf_cnpj: string;
+  email: string;
+  phone: string;
+};
+
+// Tipo para Cobrança (baseado no CobrancaForm.jsx)
+export type PaymentData = {
+  payment_id: string;
+  account_id: string;
+  amount: number;
+  description: string;
+  due_date: string;
+  pix_key: string;
+  fine_amount: number;
+  interest_rate: number;
+  // days_before_due_date não é retornado pela API, apenas enviado
 };
 
 // Helper para telas do Stack

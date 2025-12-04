@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,30 +7,135 @@ import {
   ScrollView,
   StyleSheet,
   Platform,
+  Alert, // Importar Alert
+  ActivityIndicator, // Importar ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AppStackScreenProps } from "../../routes/types";
 import { colors } from "../../constants/colors";
+import { API_URL } from "../../config/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Agora o tipo Props inclui 'route' para podermos pegar o 'editId'
 type Props = AppStackScreenProps<"CadastrarPagador">;
 
-export default function CadastrarPagador({ navigation }: Props) {
+export default function CadastrarPagador({ navigation, route }: Props) {
+  // Pegar o editId dos parâmetros da rota
+  const editId = route.params?.editId;
+
   const [nomeCompleto, setNomeCompleto] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [cpfCnpj, setCpfCnpj] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [cep, setCep] = useState("");
-  const [endereco, setEndereco] = useState("");
 
-  const handleSalvar = () => {
-    console.log('Salvando pagador...');
-    // Lógica para salvar o pagador
-    navigation.goBack();
+  // Estados de controle
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  // useEffect para buscar dados do pagador se estiver em modo de edição
+  useEffect(() => {
+    if (editId) {
+      const fetchPagador = async () => {
+        setLoading(true);
+        try {
+          const token = await AsyncStorage.getItem("token");
+          const response = await fetch(
+            `${API_URL}/financial/recurring/${editId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const data = await response.json();
+          if (response.ok) {
+            // Preenche o formulário com os dados do servidor
+            setNomeCompleto(data.name || "");
+            setDescricao(data.description || ""); 
+            setCpfCnpj(data.cpf_cnpj || "");
+            setEmail(data.email || "");
+            setTelefone(data.phone || "");
+          } else {
+            Alert.alert(
+              "Erro",
+              data.msg || "Não foi possível buscar os dados do cliente."
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao buscar pagador:", error);
+          Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPagador();
+    }
+  }, [editId]); // Executa quando 'editId' mudar
+
+  // Função de salvar (lógica do desktop)
+  const handleSalvar = async () => {
+    setLoading(true);
+    setErro(null);
+
+    // Validação básica
+    if (!nomeCompleto || !cpfCnpj || !email || !telefone) {
+      setErro("Por favor, preencha todos os campos obrigatórios!");
+      setLoading(false);
+      return;
+    }
+
+    // Monta o payload 
+    const pagadorData = {
+      name: nomeCompleto,
+      description: descricao, 
+      cpf_cnpj: cpfCnpj,
+      email: email,
+      phone: telefone,
+    };
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+      // Define a URL e o Método (Criação ou Edição)
+      const url = editId
+        ? `${API_URL}/financial/recurring/${editId}`
+        : `${API_URL}/financial/recurring`;
+      const method = editId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(pagadorData),
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          "Sucesso!",
+          editId
+            ? "Cliente atualizado com sucesso!"
+            : "Cliente cadastrado com sucesso!"
+        );
+        navigation.goBack(); 
+      } else {
+        const errorData = await response.json();
+        setErro(errorData.msg || "Erro ao salvar cliente.");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      setErro("Erro de conexão com o servidor. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancelar = () => {
-    navigation.goBack();
+    if (!loading) {
+      navigation.goBack();
+    }
   };
 
   return (
@@ -39,41 +144,60 @@ export default function CadastrarPagador({ navigation }: Props) {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          disabled={loading}
         >
           <Ionicons name="arrow-back" size={24} color={colors.gray[50]} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Dados do Cliente</Text>
+        <Text style={styles.headerTitle}>
+          {editId ? "Editar Cliente" : "Dados do Cliente"}
+        </Text>
       </View>
 
       <View style={styles.content}>
         <Text style={styles.instructionText}>
-          Crie um novo cliente para suas cobranças!
+          {editId
+            ? "Atualize os dados do cliente."
+            : "Crie um novo cliente para suas cobranças!"}
         </Text>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Nome Completo</Text>
+          <Text style={styles.label}>Nome Completo *</Text>
           <TextInput
             style={styles.input}
             placeholder="Nome Completo"
             placeholderTextColor={colors.gray[400]}
             value={nomeCompleto}
             onChangeText={setNomeCompleto}
+            editable={!loading}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>CPF/CNPJ</Text>
+          <Text style={styles.label}>Descrição</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ex: Pagamento do Aluguel Apt 101"
+            placeholderTextColor={colors.gray[400]}
+            value={descricao}
+            onChangeText={setDescricao}
+            editable={!loading}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>CPF/CNPJ *</Text>
           <TextInput
             style={styles.input}
             placeholder="000.000.000-00"
             placeholderTextColor={colors.gray[400]}
             value={cpfCnpj}
             onChangeText={setCpfCnpj}
+            editable={!loading}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Email *</Text>
           <TextInput
             style={styles.input}
             placeholder="exemplo@email.com"
@@ -82,11 +206,12 @@ export default function CadastrarPagador({ navigation }: Props) {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!loading}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={styles.label}>Telefone *</Text>
           <TextInput
             style={styles.input}
             placeholder="(00) 00000-0000"
@@ -94,66 +219,40 @@ export default function CadastrarPagador({ navigation }: Props) {
             value={telefone}
             onChangeText={setTelefone}
             keyboardType="phone-pad"
+            editable={!loading}
           />
         </View>
+      </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Categoria</Text>
-          <View style={styles.inputWithIcon}>
-            <TextInput
-              style={styles.input}
-              placeholder="Aluguel"
-              placeholderTextColor={colors.gray[400]}
-              value={categoria}
-              onChangeText={setCategoria}
-            />
-            <Ionicons 
-              name="chevron-down" 
-              size={20} 
-              color={colors.gray[400]} 
-              style={styles.dropdownIcon}
-            />
-          </View>
-        </View>
+      {/* Exibe o erro do servidor ou de validação */}
+      {erro ? <Text style={styles.error}>{erro}</Text> : null}
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>CEP</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="00000-000"
-            placeholderTextColor={colors.gray[400]}
-            value={cep}
-            onChangeText={setCep}
-            keyboardType="numeric"
-          />
-        </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.cancelarButton,
+            loading && styles.buttonDisabled,
+          ]}
+          onPress={handleCancelar}
+          disabled={loading}
+        >
+          <Text style={styles.cancelarButtonText}>CANCELAR</Text>
+        </TouchableOpacity>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Endereço</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Cidade, Bairro, Número"
-            placeholderTextColor={colors.gray[400]}
-            value={endereco}
-            onChangeText={setEndereco}
-          />
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.cancelarButton}
-            onPress={handleCancelar}
-          >
-            <Text style={styles.cancelarButtonText}>CANCELAR</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.salvarButton}
-            onPress={handleSalvar}
-          >
+        <TouchableOpacity
+          style={[
+            styles.salvarButton,
+            loading && styles.buttonDisabled,
+          ]}
+          onPress={handleSalvar}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={colors.gray[900]} />
+          ) : (
             <Text style={styles.salvarButtonText}>SALVAR</Text>
-          </TouchableOpacity>
-        </View>
+          )}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -257,5 +356,16 @@ const styles = StyleSheet.create({
     color: colors.gray[900],
     fontSize: 16,
     fontWeight: "bold",
+  },
+  // ESTILOS ADICIONADOS
+  error: {
+    color: "#ff5252",
+    textAlign: "center",
+    marginBottom: 10,
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 });

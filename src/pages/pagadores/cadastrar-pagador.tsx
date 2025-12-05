@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[450],
     borderRadius: 10,
     paddingVertical: 15,
-    marginRight: 10,
+    margin: 10,
     alignItems: "center",
   },
   cancelarButtonText: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green[500],
     borderRadius: 10,
     paddingVertical: 15,
-    marginLeft: 10,
+    margin: 10,
     alignItems: "center",
   },
   salvarButtonText: {

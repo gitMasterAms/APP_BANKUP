@@ -9,7 +9,7 @@ import { RootStackParamList } from "./types";
 import Config from "../pages/configuracoes";
 import DrawerRoutes from "./drawer.routes";
 import PlansScreen from "../pages/planos";
-import ConfigUser from "../pages/configUser/inde";
+import ConfigUser from "../pages/configUser";
 import CriandoCobranca from "../pages/cobrancas/criandoCobranca";
 import CadastrarPagador from "../pages/pagadores/cadastrar-pagador";
 import DetalhesPagador from "../pages/pagadores/detalhes-pagador";

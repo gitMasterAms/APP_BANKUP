@@ -153,14 +153,14 @@ export default function Cadastro({ navigation }: Props) {
           </TouchableOpacity>
                  {" "}
           <Text style={styles.footerText}>
-                      Já tem uma conta?          {" "}
+                      Já tem uma conta? 
             <Text
               style={styles.link}
               onPress={() => (!loading ? navigation.navigate("Login") : null)} // Proteção contra clique durante o loading
             >
-                          Entrar          {" "}
+                 Entrar          {" "}
             </Text>
-                   {" "}
+            
           </Text>
                {" "}
         </View>
@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
   button: {
     width: 295,
     backgroundColor: colors.green[400],
+    paddingVertical: 15,
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
@@ -236,7 +237,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: colors.gray[100],
-    textAlign: "center",
     marginTop: 14,
   },
   link: {

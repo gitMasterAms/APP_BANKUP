@@ -46,6 +46,7 @@ export type UserData = {
   phone?: string;
   address?: string;
   birthdate?: string;
+  avatar_url?: string;
 };
 export type PayerData = {
   account_id: string;

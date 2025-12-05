@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: colors.gray[450], // Cor de placeholder
     borderWidth: 2,
-    borderColor: colors.green[400],
+    borderColor: colors.gray[420],
   },
   changePicText: {
     color: colors.green[400],

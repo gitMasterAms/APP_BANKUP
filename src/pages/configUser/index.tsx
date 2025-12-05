@@ -8,88 +8,82 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator, // Importado
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "./styleConfigUser"; // Importa os estilos do arquivo separado
-import { AppStackScreenProps, UserData } from "../../routes/types"; // Importar UserData
+import { styles } from "./styleConfigUser";
+import { AppStackScreenProps, UserData } from "../../routes/types";
 import { colors } from "../../constants/colors";
-import { useFocusEffect } from "@react-navigation/native"; // Importado
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Importado
-import { API_URL } from "../../config/api"; // Importado
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "../../config/api";
 
 type Props = AppStackScreenProps<"ConfigUser">;
 
 export default function ConfigUser({ navigation }: Props) {
-  // Estado para armazenar os dados do usuário vindos da API
   const [userData, setUserData] = useState<Partial<UserData>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // useFocusEffect é como o useEffect, mas roda toda vez que a tela entra em foco
+  // Estado para a foto
+  const [localImage, setLocalImage] = useState<string | null>(null);
+
   useFocusEffect(
     useCallback(() => {
-      const fetchUserData = async () => {
+      const fetchData = async () => {
         setLoading(true);
         setError(null);
-        const token = await AsyncStorage.getItem("token");
 
+        const token = await AsyncStorage.getItem("token");
         if (!token) {
-          Alert.alert(
-            "Erro",
-            "Você não está autenticado. Faça login novamente."
-          );
+          Alert.alert("Erro", "Você não está autenticado.");
           setLoading(false);
-          navigation.navigate("Login"); // Manda para o Login
+          navigation.navigate("Login");
           return;
         }
 
         try {
+          // 1. TENTA CARREGAR A FOTO SALVA NO CELULAR (AsyncStorage)
+          // Fazemos isso toda vez que a tela ganha foco para pegar atualizações
+          const savedImage = await AsyncStorage.getItem("user_profile_image");
+          if (savedImage) {
+            setLocalImage(savedImage);
+          }
+
+          // 2. CARREGA DADOS DA API
           const profileResponse = await fetch(`${API_URL}/user/profile`, {
             method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           });
 
           if (profileResponse.ok) {
             const profileData = await profileResponse.json();
             setUserData(profileData);
+
+            // Fallback: Se não tiver imagem no celular, mas tiver no banco (futuro), usa a do banco
+            if (!savedImage && profileData.avatar_url) {
+              setLocalImage(profileData.avatar_url);
+            }
           } else if (profileResponse.status === 404) {
-            // 404 significa que o perfil "adicional" não foi preenchido
-            // mas o 'email' deve existir (do cadastro inicial)
             const email = await AsyncStorage.getItem("email");
-            setUserData({ email: email || "Não informado (404)" });
-            Alert.alert(
-              "Perfil Incompleto",
-              "Por favor, complete seu cadastro na tela de 'Cadastro Adicional'."
-            );
-            // Você pode querer navegar para 'CadastroAdicional' aqui
+            setUserData({ email: email || "Não informado" });
           } else {
             const errorData = await profileResponse.json();
-            throw new Error(
-              errorData.msg || "Falha ao carregar os dados do perfil."
-            );
+            throw new Error(errorData.msg || "Falha ao carregar perfil.");
           }
         } catch (error: any) {
-          console.error("Erro ao buscar dados do usuário:", error);
-          setError(error.message || "Erro ao carregar dados do perfil");
-          Alert.alert(
-            "Erro",
-            error.message || "Erro ao carregar dados do perfil"
-          );
+          console.error("Erro geral:", error);
+          setError(error.message || "Erro ao carregar dados.");
         } finally {
           setLoading(false);
         }
       };
 
-      fetchUserData();
+      fetchData();
     }, [navigation])
   );
 
   const handleEdit = () => {
-    // Navega para a tela de edição passando os dados atuais
-    // O erro de tipo não vai mais acontecer pois atualizamos 'routes/types.ts'
     navigation.navigate("EditarDadosUser", { currentUserData: userData });
   };
 
@@ -125,12 +119,15 @@ export default function ConfigUser({ navigation }: Props) {
                 <Image
                   style={styles.profilePic}
                   source={{
-                    uri: "https://placehold.co/100x100/333/FFF?text=Foto",
+                    // Lógica: Usa imagem local > ou do banco > ou placeholder
+                    uri: localImage
+                      ? localImage
+                      : userData.avatar_url ||
+                        "https://placehold.co/100x100/333/FFF?text=Foto",
                   }}
                 />
               </View>
 
-              {/* --- FORMULÁRIO (AGORA COM DADOS REAIS) --- */}
               <View style={styles.form}>
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>Email</Text>
@@ -170,7 +167,6 @@ export default function ConfigUser({ navigation }: Props) {
                 <View style={styles.inputGroup}>
                   <Text style={styles.label}>Data de Nascimento</Text>
                   <Text style={styles.input}>
-                    {/* Adicionado timeZone: 'UTC' para evitar erro de 1 dia */}
                     {userData.birthdate
                       ? new Date(userData.birthdate).toLocaleDateString(
                           "pt-BR",
@@ -181,11 +177,10 @@ export default function ConfigUser({ navigation }: Props) {
                 </View>
               </View>
 
-              {/* --- BOTÕES DE AÇÃO --- */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[styles.button, styles.buttonSecondary]}
-                  onPress={handleEdit} // Chama a função de navegação
+                  onPress={handleEdit}
                 >
                   <Text style={[styles.buttonText, styles.buttonTextSecondary]}>
                     Editar

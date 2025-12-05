@@ -45,13 +45,11 @@ const InfoCard = ({
 );
 
 export default function Home({ navigation }: Props) {
-  // 1. REMOVIDO: const { currentUserData } = route.params;
-  // A Home não deve depender de params para dados vitais.
-
   const [loading, setLoading] = useState(true);
-
-  // 2. CORREÇÃO: Vamos usar um nome padrão "Usuário" até carregar o real
   const [userName, setUserName] = useState("Usuário");
+
+  // 1. NOVO ESTADO PARA A FOTO
+  const [userImage, setUserImage] = useState<string | null>(null);
 
   const [cobrancas, setCobrancas] = useState<PaymentData[]>([]);
   const [pagadores, setPagadores] = useState<PayerData[]>([]);
@@ -59,22 +57,24 @@ export default function Home({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       const fetchData = async () => {
-        // setLoading(true); // Opcional
         try {
           const token = await AsyncStorage.getItem("token");
 
-          // Tenta pegar do AsyncStorage primeiro para ser rápido
+          // Tenta pegar nome e IMAGEM do AsyncStorage primeiro para ser rápido
           const storedName = await AsyncStorage.getItem("userName");
           if (storedName) setUserName(storedName);
 
+          // 2. BUSCA A FOTO SALVA NO CELULAR
+          const storedImage = await AsyncStorage.getItem("user_profile_image");
+          if (storedImage) setUserImage(storedImage);
+
           const headers = { Authorization: `Bearer ${token}` };
 
-          // 3. ADIÇÃO: Buscamos também o profile do usuário para garantir que o nome está atualizado
           const [paymentsResponse, pagadoresResponse, userResponse] =
             await Promise.all([
               fetch(`${API_URL}/financial/payments`, { headers }),
               fetch(`${API_URL}/financial/recurring`, { headers }),
-              fetch(`${API_URL}/user/profile`, { headers }), // Adicionado endpoint de perfil
+              fetch(`${API_URL}/user/profile`, { headers }),
             ]);
 
           const paymentsData = await paymentsResponse.json();
@@ -83,10 +83,13 @@ export default function Home({ navigation }: Props) {
           // Processar dados do usuário
           if (userResponse.ok) {
             const userData = await userResponse.json();
-            // Atualiza o estado da tela
             setUserName(userData.name);
-            // Atualiza o cache local para a próxima vez ser mais rápido
             await AsyncStorage.setItem("userName", userData.name);
+
+            // Fallback: Se não achou foto no celular (storedImage), tenta ver se veio do banco
+            if (!storedImage && userData.avatar_url) {
+              setUserImage(userData.avatar_url);
+            }
           }
 
           if (Array.isArray(paymentsData)) setCobrancas(paymentsData);
@@ -159,7 +162,6 @@ export default function Home({ navigation }: Props) {
   const ultimasAtividades = cobrancas.slice(0, 4);
 
   if (loading && !userName) {
-    // Só mostra loading tela cheia se não tiver nem o nome ainda
     return (
       <View
         style={[
@@ -179,29 +181,44 @@ export default function Home({ navigation }: Props) {
           <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
             <MaterialCommunityIcons name="menu" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
-            {/* Ajuste o caminho da imagem conforme necessário */}
-            <Image
-              style={styles.logo}
-              source={require("../../assets/images/bankup-branco-e-verde.png")}
-            />
-          </TouchableOpacity>
+          {/* Ajuste: removi o toggleDrawer da logo para evitar clique acidental duplo, mas pode manter se quiser */}
+          <Image
+            style={styles.logo}
+            source={require("../../assets/images/bankup-branco-e-verde.png")}
+          />
         </View>
 
         <View style={styles.header2}>
           <Ionicons name="notifications-outline" size={24} color="#fff" />
-          <FontAwesome
-            name="user-circle"
-            size={24}
-            color="#fff"
-            onPress={() => navigation.navigate("ConfigUser")}
-          />
+
+          {/* 3. LÓGICA DO ÍCONE DE PERFIL */}
+          <TouchableOpacity onPress={() => navigation.navigate("ConfigUser")}>
+            {userImage ? (
+              // Se tiver imagem, mostra ela redondinha
+              <Image
+                source={{ uri: userImage }}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16, // Metade da largura/altura para ser círculo
+                  marginLeft: 15, // Espaçamento do ícone de notificação
+                }}
+              />
+            ) : (
+              // Se não tiver, mostra o ícone padrão
+              <FontAwesome
+                name="user-circle"
+                size={24}
+                color="#fff"
+                style={{ marginLeft: 15 }}
+              />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Bem-vindo */}
       <View style={styles.welcomeSection}>
-        {/* Usando a variável de estado correta: userName */}
         <Text style={styles.welcomeTitle}>Bem-vindo, {userName}</Text>
         <Text style={styles.welcomeSubtitle}>
           Visão geral das suas cobranças
@@ -272,7 +289,13 @@ export default function Home({ navigation }: Props) {
         })}
 
         {ultimasAtividades.length === 0 && (
-          <Text style={{ color: colors.gray[400], fontStyle: "italic" }}>
+          <Text
+            style={{
+              color: colors.gray[400],
+              fontStyle: "italic",
+              marginTop: 10,
+            }}
+          >
             Nenhuma atividade recente.
           </Text>
         )}

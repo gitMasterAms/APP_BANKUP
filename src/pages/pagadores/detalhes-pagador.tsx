@@ -263,7 +263,8 @@ export default function DetalhesPagador({ navigation, route }: Props) {
                     </View>
 
                     <Text style={styles.dropdownItemValue}>
-                      R$ {pagamento.amount.toFixed(2)}
+                      {/* Convertemos para Number() antes de fixar as casas decimais */}
+                      R$ {Number(pagamento.amount).toFixed(2)}
                     </Text>
                   </View>
                 ))
@@ -395,10 +396,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dropdownButton: {
-    backgroundColor: colors.gray[970],
     borderRadius: 10,
     paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
   dropdownText: {

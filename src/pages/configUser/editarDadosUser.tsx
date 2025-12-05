@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Adicionei useEffect
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { AppStackScreenProps } from "../../routes/types";
 import { colors } from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../../config/api";
+import * as ImagePicker from "expo-image-picker";
 
 type Props = AppStackScreenProps<"EditarDadosUser">;
 
@@ -47,8 +48,52 @@ export default function EditarDadosUser({ navigation, route }: Props) {
     formatarDeISO(currentUserData.birthdate)
   );
 
+  // Estado da imagem local
+  const [localImage, setLocalImage] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // --- 1. CARREGAR A FOTO SALVA NO CELULAR AO ABRIR A TELA ---
+  useEffect(() => {
+    const loadSavedImage = async () => {
+      try {
+        const savedImage = await AsyncStorage.getItem("user_profile_image");
+        if (savedImage) {
+          setLocalImage(savedImage);
+        } else if (currentUserData.avatar_url) {
+          // Se não tiver no celular, mas tiver no banco, usa do banco
+          setLocalImage(currentUserData.avatar_url);
+        }
+      } catch (e) {
+        console.log("Erro ao carregar imagem salva", e);
+      }
+    };
+    loadSavedImage();
+  }, []);
+
+  // --- 2. FUNÇÃO PARA ESCOLHER FOTO NA GALERIA ---
+  const pickImage = async () => {
+    // Pede permissão
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão necessária", "Precisamos de acesso à galeria.");
+      return;
+    }
+
+    // Abre galeria
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // Corta quadrado
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      // Atualiza o estado visualmente na hora
+      setLocalImage(result.assets[0].uri);
+    }
+  };
 
   const handleSalvar = async () => {
     setLoading(true);
@@ -63,7 +108,10 @@ export default function EditarDadosUser({ navigation, route }: Props) {
 
     // Validações básicas
     if (!nomeCompleto || !cpf || !email) {
-      Alert.alert("Atenção", "Preencha os campos obrigatórios (nome, CPF e email).");
+      Alert.alert(
+        "Atenção",
+        "Preencha os campos obrigatórios (nome, CPF e email)."
+      );
       setLoading(false);
       return;
     }
@@ -90,6 +138,12 @@ export default function EditarDadosUser({ navigation, route }: Props) {
       const responseData = await response.json();
 
       if (response.ok) {
+        // --- PASSO B: SALVA A FOTO NO CELULAR (ASYNC STORAGE) ---
+        // Isso acontece apenas se a API der sucesso primeiro
+        if (localImage) {
+          await AsyncStorage.setItem("user_profile_image", localImage);
+        }
+
         Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
         navigation.goBack(); // volta para tela ConfigUser
       } else {
@@ -123,11 +177,33 @@ export default function EditarDadosUser({ navigation, route }: Props) {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* FOTO DE PERFIL */}
           <View style={styles.profilePicContainer}>
-            <Image
-              style={styles.profilePic}
-              source={{ uri: "https://placehold.co/100x100/333/FFF?text=Foto" }}
-            />
-            <TouchableOpacity>
+            <TouchableOpacity onPress={pickImage}>
+              <Image
+                style={styles.profilePic}
+                source={{
+                  // Prioridade: Imagem local > Imagem do banco > Placeholder
+                  uri: localImage
+                    ? localImage
+                    : currentUserData.avatar_url ||
+                      "https://placehold.co/100x100/333/FFF?text=Foto",
+                }}
+              />
+              {/* Ícone de câmera para indicar clique */}
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  backgroundColor: colors.green[400],
+                  padding: 5,
+                  borderRadius: 20,
+                }}
+              >
+                <Ionicons name="camera" size={16} color="white" />
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={pickImage}>
               <Text style={styles.changePicText}>Alterar foto</Text>
             </TouchableOpacity>
           </View>
